@@ -1,19 +1,19 @@
 # Paleta de colores (usar exactamente estos valores)
 
-- Burnt Sienna — #C2652A (Color principal oscuro)
-- Flint — #78706A (Color primario de acción)
-- Brick Red — #8C3C3C (Fondo suave / tarjetas destacadas)
-- Pedernal — #605850 (Fondo general de la app)
+- Primary — #c2652a (Botones, detalles principales)
+- On-Primary — #ffffff (Texto sobre primary)
+- Surface / Background — #fff8f4 (Fondo general de la app)
+- On-Surface — #211a17 (Texto principal)
+- Surface-Variant — #f4e0d4 (Fondos secundarios)
+- On-Surface-Variant — #52443c (Texto secundario / gris)
+- Outline — #85736b (Bordes y separadores)
+- Sahara-Dim — #e4d8ce (Etiquetas, fondos específicos)
+- Sahara-Container — #f8ece2 (Contenedores alternativos)
 
-- Fondo principal: Pedernal
-- Botones primarios: Flint
-- Headers / navegación: Burnt Sienna
-- Tarjetas destacadas: Brick Red
-- Texto principal: Burnt Sienna
+# Tipografía e Iconos
 
-# Tipografía
-
-- Uso obligatorio de SF Pro Display
+- Uso obligatorio de **Manrope** (Google Fonts) para toda la tipografía.
+- Uso de **Material Icons** y **Material Symbols Outlined** para la iconografía.
 
 # Prioridades
 
