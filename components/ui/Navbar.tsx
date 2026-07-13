@@ -3,12 +3,15 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search, Bell, Globe, ChevronDown, Check, Plus, Menu, X, Heart } from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
+import { Search, Bell, Globe, ChevronDown, Check, Plus, Menu, X, Heart, User, LogOut, ShieldCheck } from "lucide-react";
 import { CoworkLogo } from "@/components/CoworkLogo";
 
 export function Navbar() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const { data: session, status } = useSession();
+  const user = session?.user;
 
   const navLink = (href: string, label: string, className = "") => (
     <Link
@@ -69,6 +72,34 @@ export function Navbar() {
               <Bell size={20} />
               <span className="absolute top-0 right-0 w-2 h-2 bg-primary rounded-full border-2 border-background"></span>
             </button>
+
+            {status === "authenticated" && user ? (
+              <div className="relative group hidden md:block">
+                <button className="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors font-bold text-sm py-2">
+                  <User size={18} />
+                  <span className="max-w-[120px] truncate">{user.name}</span>
+                  <ChevronDown size={16} />
+                </button>
+                <div className="absolute top-full right-0 mt-1 w-48 bg-white rounded-lg shadow-soft border border-outline/10 py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                  {user.role === "admin" && (
+                    <Link href="/admin" className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-on-surface-variant hover:text-primary hover:bg-primary/5">
+                      <ShieldCheck size={14} /> Panel admin
+                    </Link>
+                  )}
+                  <button
+                    onClick={() => signOut({ callbackUrl: "/" })}
+                    className="w-full flex items-center gap-2 text-left px-4 py-2 text-xs font-bold text-on-surface-variant hover:text-primary hover:bg-primary/5"
+                  >
+                    <LogOut size={14} /> Cerrar sesión
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <Link href="/login" className="hidden md:flex items-center gap-1.5 text-sm font-bold text-on-surface-variant hover:text-primary transition-colors">
+                <User size={18} /> Ingresar
+              </Link>
+            )}
+
             <button
               onClick={() => setMenuOpen((v) => !v)}
               aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"}
@@ -93,6 +124,38 @@ export function Navbar() {
           >
             <Heart size={16} /> Favoritos
           </Link>
+
+          {status === "authenticated" && user ? (
+            <>
+              {user.role === "admin" && (
+                <Link
+                  href="/admin"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-2 py-2 text-on-surface-variant hover:text-primary font-semibold text-sm transition-all"
+                >
+                  <ShieldCheck size={16} /> Panel admin
+                </Link>
+              )}
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  signOut({ callbackUrl: "/" });
+                }}
+                className="flex items-center gap-2 py-2 text-on-surface-variant hover:text-primary font-semibold text-sm transition-all"
+              >
+                <LogOut size={16} /> Cerrar sesión
+              </button>
+            </>
+          ) : (
+            <Link
+              href="/login"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-2 py-2 text-on-surface-variant hover:text-primary font-semibold text-sm transition-all"
+            >
+              <User size={16} /> Ingresar
+            </Link>
+          )}
+
           <Link
             href="/publicar"
             onClick={() => setMenuOpen(false)}

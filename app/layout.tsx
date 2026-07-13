@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
 import "./globals.css";
 import { IntroGate } from "@/components/IntroGate";
+import { SessionProviderWrapper } from "@/components/SessionProviderWrapper";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -23,6 +24,7 @@ export default function RootLayout({
     <html
       lang="es"
       className={`${manrope.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <head>
         <script
@@ -33,7 +35,9 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col font-sans selection:bg-primary selection:text-white bg-background text-on-surface">
-        <IntroGate>{children}</IntroGate>
+        <SessionProviderWrapper>
+          <IntroGate>{children}</IntroGate>
+        </SessionProviderWrapper>
       </body>
     </html>
   );
