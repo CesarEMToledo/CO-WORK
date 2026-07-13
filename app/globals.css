@@ -26,6 +26,11 @@
 }
 
 @layer base {
+  html,
+  body {
+    overflow-x: hidden;
+  }
+
   .hide-scroll::-webkit-scrollbar {
     display: none;
   }
