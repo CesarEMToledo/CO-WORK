@@ -5,11 +5,31 @@ export type PropertyCategory =
   | "Glamping"
   | "Casa"
   | "Departamento"
-  | "Terreno";
+  | "Terreno"
+  | "Oficina"
+  | "Rancho";
 
 export interface PropertySpec {
   icon: string;
   label: string;
+}
+
+export interface PropertyAgent {
+  name: string;
+  role: string;
+  phone: string;
+  initials: string;
+}
+
+export interface PropertyCoordinates {
+  lat: number;
+  lng: number;
+}
+
+export interface PropertyBilling {
+  available: boolean;
+  note: string;
+  detail?: string;
 }
 
 export interface Property {
@@ -23,10 +43,14 @@ export interface Property {
   description: string;
   specs: PropertySpec[];
   imageUrl: string;
-  badge?: {
-    text: string;
-    variant: "primary" | "sahara";
-  };
+  /** Optional overrides — when absent, lib/property-details.ts derives sensible defaults. */
+  agent?: PropertyAgent;
+  coordinates?: PropertyCoordinates;
+  amenities?: string[];
+  billing?: PropertyBilling;
+  images?: string[];
+  /** YouTube link only — no video files are stored, just the URL. */
+  videoUrl?: string;
 }
 
 export const CATEGORIES: { id: PropertyCategory; label: string }[] = [
@@ -41,108 +65,114 @@ export const featuredCollections: Property[] = [
     id: "fc-1",
     title: "Residencia Surrealista",
     location: "Xilitla, SLP",
-    price: "$12,500 MXN",
+    price: "$12,500",
+    priceSuffix: "/noche",
     type: "RENTA",
     category: "Villa",
     description:
       "Una villa de autor a pasos del Jardín Escultórico de Edward James, con cascada privada y vistas a la selva de Xilitla.",
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuCra-FKp81t0_OM8bWD55m2o9OOSnR_v7D0UilyExMImxyIcr9tIMZ2Py3HcC0ra_MtSsBkduMcwxUNKI9_iSXFFr_YRON1SF9hNM3fcYy-uG7N7uusL0Z367WINi1V7_GwfNQx-gsbUqLtzVi4ivFyqFQGb4qBs79bALeSFb6i3_ZnJnI1VVrN-VeZYHjfYyQI5C6zy90N3uxWZpwzIBhNoUDKKQjQ8EOEYPoyPTzhnh6b6AS3dkkFJ8t4xSDC6qjhMrQUoUPnAeM",
-    badge: { text: "Exclusivo", variant: "primary" },
+    videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     specs: [
-      { icon: "king_bed", label: "4 Hab" },
-      { icon: "bathtub", label: "3.5 Baños" },
-      { icon: "water_drop", label: "Cascada" },
+      { icon: "king_bed", label: "4" },
+      { icon: "bathtub", label: "3.5" },
+      { icon: "square_foot", label: "320m²" },
     ],
   },
   {
     id: "fc-2",
     title: "Mirador del Salto",
     location: "Tamasopo, Huasteca",
-    price: "$8,200 MXN",
+    price: "$8,200",
+    priceSuffix: "/noche",
     type: "RENTA",
     category: "Cabaña",
     description:
       "Cabaña de madera con terraza suspendida sobre las cascadas de Tamasopo, ideal para desconectarse en pareja.",
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuDurAGHzg_fpQxFal-obkFVy1Q3WLPdueAQpz0itcQiRV-WfvulnBEDJbNeV8J06q4mX7PTtXYVJjX4-mHVr_khZLZxQ_s8f6fruGqzeqALyMu8wEHRK1EsOs9f4_jPmS7FxcdzrDkR88Wz0GjaPLXkTZRoJQfur59rxYRLi-WYcW-VU_gKS39CPLOMlftvqGvW0IOk5tXgst5mJ4WQM-ICN4vkdel9ido9YFUQga0OI10i6NSe5W4owt33-2YRi_b_ltdZW2QZC5s",
-    badge: { text: "Nuevo", variant: "sahara" },
+    videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     specs: [
-      { icon: "king_bed", label: "2 Hab" },
-      { icon: "bathtub", label: "2 Baños" },
-      { icon: "pool", label: "Alberca" },
+      { icon: "king_bed", label: "2" },
+      { icon: "bathtub", label: "2" },
+      { icon: "square_foot", label: "140m²" },
     ],
   },
   {
     id: "fc-3",
     title: "Villa Selva Real",
     location: "Aquismón, SLP",
-    price: "$9,500 MXN",
+    price: "$9,500",
+    priceSuffix: "/noche",
     type: "RENTA",
     category: "Villa",
     description:
       "Villa rodeada de selva alta, a minutos del Sótano de las Golondrinas, con alberca infinita y palapa para eventos.",
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuBGq4Phm0uDzCnjHAsnWpYTBVpOds_M6iOsJuRQQA5eUZHkztGgtc7eh_OE6wBeyW1-iZh7yyhROnvvmqkAZ9tyAWFGXk0FG52zU4kZ_EDLA0U0cRszy7byNXTeWe0_hS53SYmtCTEV8Y1AM-WxiIC38UMa15QwFDjXtCGQOxoh35K0Ol_70vfsxm0VqDbaWkr8tcEbLTLy0NXH_GcpGK4lAXizgxYOIlFWGyau-4OIfPZRpjCBDbz_qu3VlN201UUJGiuM9ajVd-U",
-    badge: { text: "Top Rated", variant: "primary" },
+    videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     specs: [
-      { icon: "king_bed", label: "3 Hab" },
-      { icon: "bathtub", label: "3 Baños" },
-      { icon: "forest", label: "Selva" },
+      { icon: "king_bed", label: "3" },
+      { icon: "bathtub", label: "3" },
+      { icon: "square_foot", label: "260m²" },
     ],
   },
   {
     id: "fc-4",
     title: "Refugio del Río",
     location: "El Naranjo, Huasteca",
-    price: "$6,800 MXN",
+    price: "$6,800",
+    priceSuffix: "/noche",
     type: "RENTA",
     category: "Ecolodge",
     description:
       "Ecolodge frente al río, construido con materiales de la región, pensado para nadar, pescar y descansar en hamaca.",
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuB4zNatD3vePhIZAi6OHHJKmamYSgeBNSKjEt32tvkkf4s6aBXCF8R4LNfDfPa9leA0t6N1OKOcP358WwZrnosbCBxSM7EaY2_P7qkx3MinRgmHQn7RvleNTwy8cLigMoR3iv0u83chBVbZYI6BcNMcqv80W-l1pIUgIWZcDIXEqtUatrsojSGfM0lTNDZpkBntBUkRY6NB4ZUymYNYvTHXKbO8NZ6N6uoyuuHqcaRWKzHCNXkOR3p-_EVFAHR8QwijIY_m1mefPZ4",
-    badge: { text: "Ecológico", variant: "sahara" },
+    videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     specs: [
-      { icon: "king_bed", label: "2 Hab" },
-      { icon: "bathtub", label: "2 Baños" },
-      { icon: "waves", label: "Vista Río" },
+      { icon: "king_bed", label: "2" },
+      { icon: "bathtub", label: "2" },
+      { icon: "square_foot", label: "150m²" },
     ],
   },
   {
     id: "fc-5",
     title: "Nube de Oro Glamping",
     location: "Micos, Ciudad Valles",
-    price: "$4,500 MXN",
+    price: "$4,500",
+    priceSuffix: "/noche",
     type: "RENTA",
     category: "Glamping",
     description:
       "Domo de glamping con terraza y fogata privada frente a las Pozas Azules de Micos, la escapada de aventura por excelencia.",
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuARQWC19e7mleUpjb8CWLztEv_svJeRFOaC2i-9r9GctFuX5Barzhfai9wNM1WW8bcGlqdFM32d3KPf7SItom5ijdHOz5rGGQPeT7PlWs8-y9LkfcsHLQqsLxalhxP94XJo76_mAMp7T2dVj3hPKHNzTDLLiS6ujSdSsyo3onxQthp4ZkVE8op92gyTLUUucaGaxO8vJvyhH3HuWB07EPqT1WsW0lr9Of5lUPonjG9eiqE1XiJXTqzXUZQt5JorfPwCO1MioZA_Zro",
-    badge: { text: "Aventura", variant: "primary" },
+    videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     specs: [
-      { icon: "king_bed", label: "1 Hab" },
-      { icon: "local_fire_department", label: "Fogata" },
-      { icon: "wb_sunny", label: "Terraza" },
+      { icon: "king_bed", label: "1" },
+      { icon: "bathtub", label: "1" },
+      { icon: "square_foot", label: "45m²" },
     ],
   },
   {
     id: "fc-6",
     title: "Hacienda La Potosina",
     location: "Rayón, Huasteca",
-    price: "$15,000 MXN",
+    price: "$15,000",
+    priceSuffix: "/noche",
     type: "RENTA",
     category: "Villa",
     description:
       "Hacienda centenaria restaurada, con jardines extensos y arquitectura colonial, perfecta para reuniones familiares grandes.",
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuDuQ9M7U6euA6_cXmYuXnej-N5IuawAW8ds-4G1mzfqmiBc13qXsPhf9_j_zTB8gfEunrBHo8xMsxYwCw_pl8fsxbxRkmyvLR1N9Tiye5ZJG7fwlLn9MwyBanXYhE0emGwp59es1FEyQTRQbmXLUKO74Yj34ZHqrqIkOtMKhP8CmRFvfoHT5LAe10105vUhKNkxIBvtt530nfLigSUTemOOcJMVNmsgactntRJUwOBU_TZzND7BYtDklr8uZcNYlQOK5U74-ufIf-E",
-    badge: { text: "Histórico", variant: "sahara" },
+    videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     specs: [
-      { icon: "king_bed", label: "5 Hab" },
-      { icon: "history_edu", label: "Patrimonio" },
-      { icon: "park", label: "Jardín Extenso" },
+      { icon: "king_bed", label: "5" },
+      { icon: "bathtub", label: "4" },
+      { icon: "square_foot", label: "480m²" },
     ],
   },
 ];
@@ -160,6 +190,7 @@ export const marketUpdates: Property[] = [
       "Residencia familiar en fraccionamiento privado de Lomas, con jardín amplio, cocina integral y cochera para dos autos.",
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuDuQ9M7U6euA6_cXmYuXnej-N5IuawAW8ds-4G1mzfqmiBc13qXsPhf9_j_zTB8gfEunrBHo8xMsxYwCw_pl8fsxbxRkmyvLR1N9Tiye5ZJG7fwlLn9MwyBanXYhE0emGwp59es1FEyQTRQbmXLUKO74Yj34ZHqrqIkOtMKhP8CmRFvfoHT5LAe10105vUhKNkxIBvtt530nfLigSUTemOOcJMVNmsgactntRJUwOBU_TZzND7BYtDklr8uZcNYlQOK5U74-ufIf-E",
+    videoUrl: "https://youtu.be/dQw4w9WgXcQ",
     specs: [
       { icon: "king_bed", label: "3" },
       { icon: "bathtub", label: "2" },
@@ -178,10 +209,11 @@ export const marketUpdates: Property[] = [
       "Loft acogedor con vista directa al río, a un paso de las pozas de El Naranjo. Ideal para escapadas cortas.",
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuB4zNatD3vePhIZAi6OHHJKmamYSgeBNSKjEt32tvkkf4s6aBXCF8R4LNfDfPa9leA0t6N1OKOcP358WwZrnosbCBxSM7EaY2_P7qkx3MinRgmHQn7RvleNTwy8cLigMoR3iv0u83chBVbZYI6BcNMcqv80W-l1pIUgIWZcDIXEqtUatrsojSGfM0lTNDZpkBntBUkRY6NB4ZUymYNYvTHXKbO8NZ6N6uoyuuHqcaRWKzHCNXkOR3p-_EVFAHR8QwijIY_m1mefPZ4",
+    videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     specs: [
       { icon: "king_bed", label: "1" },
       { icon: "bathtub", label: "1" },
-      { icon: "waves", label: "Río" },
+      { icon: "square_foot", label: "55m²" },
     ],
   },
   {
@@ -196,10 +228,11 @@ export const marketUpdates: Property[] = [
       "Refugio ecológico entre selva y niebla, a minutos del Sótano de las Golondrinas. Perfecto para un negocio de turismo de naturaleza.",
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuARQWC19e7mleUpjb8CWLztEv_svJeRFOaC2i-9r9GctFuX5Barzhfai9wNM1WW8bcGlqdFM32d3KPf7SItom5ijdHOz5rGGQPeT7PlWs8-y9LkfcsHLQqsLxalhxP94XJo76_mAMp7T2dVj3hPKHNzTDLLiS6ujSdSsyo3onxQthp4ZkVE8op92gyTLUUucaGaxO8vJvyhH3HuWB07EPqT1WsW0lr9Of5lUPonjG9eiqE1XiJXTqzXUZQt5JorfPwCO1MioZA_Zro",
+    videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     specs: [
       { icon: "king_bed", label: "2" },
-      { icon: "local_fire_department", label: "Chimenea" },
-      { icon: "terrain", label: "Selva" },
+      { icon: "bathtub", label: "2" },
+      { icon: "square_foot", label: "180m²" },
     ],
   },
   {
@@ -214,10 +247,11 @@ export const marketUpdates: Property[] = [
       "Tienda de lujo sobre plataforma de madera, en la ruta a la Cascada de Tamul, con desayuno incluido y guía opcional.",
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuBGq4Phm0uDzCnjHAsnWpYTBVpOds_M6iOsJuRQQA5eUZHkztGgtc7eh_OE6wBeyW1-iZh7yyhROnvvmqkAZ9tyAWFGXk0FG52zU4kZ_EDLA0U0cRszy7byNXTeWe0_hS53SYmtCTEV8Y1AM-WxiIC38UMa15QwFDjXtCGQOxoh35K0Ol_70vfsxm0VqDbaWkr8tcEbLTLy0NXH_GcpGK4lAXizgxYOIlFWGyau-4OIfPZRpjCBDbz_qu3VlN201UUJGiuM9ajVd-U",
+    videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     specs: [
       { icon: "king_bed", label: "1" },
-      { icon: "star", label: "VIP" },
-      { icon: "wb_sunny", label: "Terraza" },
+      { icon: "bathtub", label: "1" },
+      { icon: "square_foot", label: "40m²" },
     ],
   },
   {
@@ -232,10 +266,11 @@ export const marketUpdates: Property[] = [
       "Estudio moderno a pasos de la zona comercial del Centro de Ciudad Valles, ideal como primera propiedad o inversión en renta.",
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuA1w-Hb1289NqZKon3VK8bpmMiCDYYiAMT5egzTINo9m9wSZRHv-k-1IGTVoL1NT8YeZXJHa87JPNDIPrtrbP7jChHq0ypXF90uByhC6VA9O788_B4FY8JVg4chbWN9bcrn9-9FvVvfZX8Aj60Iqg_C8CsCA9DEnJqi2rJvzmK5UP5z-9XRTRjBneAPCa8iGgGWBD9yYKsziN6vn0ePBDGo3inieQtmbr46W31p6UfQ649XRxTm7ygOY2J-jxW1r0qWs8i97KGpkTE",
+    videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     specs: [
       { icon: "king_bed", label: "1" },
       { icon: "bathtub", label: "1" },
-      { icon: "apartment", label: "Urbano" },
+      { icon: "square_foot", label: "48m²" },
     ],
   },
   {
@@ -250,10 +285,11 @@ export const marketUpdates: Property[] = [
       "Quinta con jardín tropical y alberca, disponible para renta vacacional o eventos familiares sobre la Carretera Nacional.",
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuCfGXdY0g51ojSg0GMeTW9ndLY3mpKK3oMtWxo2nwd_dwi1pgn1Boi_ovaDGIFhUA7nwu3WdBch8ZuHxoHu3QfgM5ceAsp8pglRVyCROWNcy9zeDNP2wqLoevyKGcaEyFYHYpIx2KK46nLWthnHiHugmkKw48kJsL8IjMO1bL3T1Zwt8bvQDTTUHTgB3GqZ2RU2asRzF1jVg0rLw3LWXXTq0YF1CsbhlWpYOuCEpH5bB8zkBlbKXR4At_M46AL8rJqn5c6BrPD5PP8",
+    videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     specs: [
       { icon: "king_bed", label: "2" },
       { icon: "bathtub", label: "2" },
-      { icon: "grass", label: "Jardín" },
+      { icon: "square_foot", label: "200m²" },
     ],
   },
   {
@@ -268,10 +304,11 @@ export const marketUpdates: Property[] = [
       "Casa de estilo colonial en el centro histórico de Xilitla, a pasos de la plaza principal y el convento de San Agustín.",
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuCra-FKp81t0_OM8bWD55m2o9OOSnR_v7D0UilyExMImxyIcr9tIMZ2Py3HcC0ra_MtSsBkduMcwxUNKI9_iSXFFr_YRON1SF9hNM3fcYy-uG7N7uusL0Z367WINi1V7_GwfNQx-gsbUqLtzVi4ivFyqFQGb4qBs79bALeSFb6i3_ZnJnI1VVrN-VeZYHjfYyQI5C6zy90N3uxWZpwzIBhNoUDKKQjQ8EOEYPoyPTzhnh6b6AS3dkkFJ8t4xSDC6qjhMrQUoUPnAeM",
+    videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     specs: [
       { icon: "king_bed", label: "3" },
       { icon: "bathtub", label: "2" },
-      { icon: "home", label: "Casa" },
+      { icon: "square_foot", label: "180m²" },
     ],
   },
   {
@@ -286,10 +323,11 @@ export const marketUpdates: Property[] = [
       "Cabaña rústica entre la selva de Xilitla, con balcón privado y acceso directo a las pozas naturales cercanas.",
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuDurAGHzg_fpQxFal-obkFVy1Q3WLPdueAQpz0itcQiRV-WfvulnBEDJbNeV8J06q4mX7PTtXYVJjX4-mHVr_khZLZxQ_s8f6fruGqzeqALyMu8wEHRK1EsOs9f4_jPmS7FxcdzrDkR88Wz0GjaPLXkTZRoJQfur59rxYRLi-WYcW-VU_gKS39CPLOMlftvqGvW0IOk5tXgst5mJ4WQM-ICN4vkdel9ido9YFUQga0OI10i6NSe5W4owt33-2YRi_b_ltdZW2QZC5s",
+    videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     specs: [
       { icon: "king_bed", label: "2" },
-      { icon: "forest", label: "Selva" },
-      { icon: "wb_sunny", label: "Balcón" },
+      { icon: "bathtub", label: "1" },
+      { icon: "square_foot", label: "90m²" },
     ],
   },
   {
@@ -304,11 +342,8 @@ export const marketUpdates: Property[] = [
       "Terreno plano con vista abierta a la sierra, listo para construir, en zona de crecimiento de Axtla de Terrazas.",
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuBGq4Phm0uDzCnjHAsnWpYTBVpOds_M6iOsJuRQQA5eUZHkztGgtc7eh_OE6wBeyW1-iZh7yyhROnvvmqkAZ9tyAWFGXk0FG52zU4kZ_EDLA0U0cRszy7byNXTeWe0_hS53SYmtCTEV8Y1AM-WxiIC38UMa15QwFDjXtCGQOxoh35K0Ol_70vfsxm0VqDbaWkr8tcEbLTLy0NXH_GcpGK4lAXizgxYOIlFWGyau-4OIfPZRpjCBDbz_qu3VlN201UUJGiuM9ajVd-U",
-    specs: [
-      { icon: "terrain", label: "Terreno" },
-      { icon: "square_foot", label: "1200m²" },
-      { icon: "eco", label: "Naturaleza" },
-    ],
+    videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    specs: [{ icon: "square_foot", label: "1200m²" }],
   },
   {
     id: "mu-10",
@@ -322,10 +357,11 @@ export const marketUpdates: Property[] = [
       "Departamento amueblado en Lomas, listo para habitar, con seguridad privada y cercanía a escuelas y plazas comerciales.",
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuB4zNatD3vePhIZAi6OHHJKmamYSgeBNSKjEt32tvkkf4s6aBXCF8R4LNfDfPa9leA0t6N1OKOcP358WwZrnosbCBxSM7EaY2_P7qkx3MinRgmHQn7RvleNTwy8cLigMoR3iv0u83chBVbZYI6BcNMcqv80W-l1pIUgIWZcDIXEqtUatrsojSGfM0lTNDZpkBntBUkRY6NB4ZUymYNYvTHXKbO8NZ6N6uoyuuHqcaRWKzHCNXkOR3p-_EVFAHR8QwijIY_m1mefPZ4",
+    videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     specs: [
       { icon: "king_bed", label: "2" },
       { icon: "bathtub", label: "1" },
-      { icon: "apartment", label: "Depa" },
+      { icon: "square_foot", label: "85m²" },
     ],
   },
   {
@@ -340,10 +376,11 @@ export const marketUpdates: Property[] = [
       "Finca productiva con casa principal, alberca y huerta propia, en la zona de Tambaque, Aquismón.",
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuARQWC19e7mleUpjb8CWLztEv_svJeRFOaC2i-9r9GctFuX5Barzhfai9wNM1WW8bcGlqdFM32d3KPf7SItom5ijdHOz5rGGQPeT7PlWs8-y9LkfcsHLQqsLxalhxP94XJo76_mAMp7T2dVj3hPKHNzTDLLiS6ujSdSsyo3onxQthp4ZkVE8op92gyTLUUucaGaxO8vJvyhH3HuWB07EPqT1WsW0lr9Of5lUPonjG9eiqE1XiJXTqzXUZQt5JorfPwCO1MioZA_Zro",
+    videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     specs: [
       { icon: "king_bed", label: "4" },
       { icon: "bathtub", label: "3" },
-      { icon: "pool", label: "Alberca" },
+      { icon: "square_foot", label: "350m²" },
     ],
   },
   {
@@ -358,10 +395,11 @@ export const marketUpdates: Property[] = [
       "Bungalow frente a las cascadas de Tamasopo, con asador propio y acceso peatonal a las pozas turquesa.",
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuDuQ9M7U6euA6_cXmYuXnej-N5IuawAW8ds-4G1mzfqmiBc13qXsPhf9_j_zTB8gfEunrBHo8xMsxYwCw_pl8fsxbxRkmyvLR1N9Tiye5ZJG7fwlLn9MwyBanXYhE0emGwp59es1FEyQTRQbmXLUKO74Yj34ZHqrqIkOtMKhP8CmRFvfoHT5LAe10105vUhKNkxIBvtt530nfLigSUTemOOcJMVNmsgactntRJUwOBU_TZzND7BYtDklr8uZcNYlQOK5U74-ufIf-E",
+    videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     specs: [
       { icon: "king_bed", label: "1" },
       { icon: "bathtub", label: "1" },
-      { icon: "waves", label: "Río" },
+      { icon: "square_foot", label: "50m²" },
     ],
   },
   {
@@ -376,10 +414,11 @@ export const marketUpdates: Property[] = [
       "Casa colonial remodelada en el centro histórico de Xilitla, con terraza panorámica hacia la sierra.",
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuA1w-Hb1289NqZKon3VK8bpmMiCDYYiAMT5egzTINo9m9wSZRHv-k-1IGTVoL1NT8YeZXJHa87JPNDIPrtrbP7jChHq0ypXF90uByhC6VA9O788_B4FY8JVg4chbWN9bcrn9-9FvVvfZX8Aj60Iqg_C8CsCA9DEnJqi2rJvzmK5UP5z-9XRTRjBneAPCa8iGgGWBD9yYKsziN6vn0ePBDGo3inieQtmbr46W31p6UfQ649XRxTm7ygOY2J-jxW1r0qWs8i97KGpkTE",
+    videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     specs: [
       { icon: "king_bed", label: "3" },
-      { icon: "history_edu", label: "Colonial" },
-      { icon: "wb_sunny", label: "Terraza" },
+      { icon: "bathtub", label: "2" },
+      { icon: "square_foot", label: "210m²" },
     ],
   },
   {
@@ -394,10 +433,11 @@ export const marketUpdates: Property[] = [
       "Cabaña junto al río Minas Viejas, con asador y vista a la cascada, ideal para grupos pequeños.",
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuCfGXdY0g51ojSg0GMeTW9ndLY3mpKK3oMtWxo2nwd_dwi1pgn1Boi_ovaDGIFhUA7nwu3WdBch8ZuHxoHu3QfgM5ceAsp8pglRVyCROWNcy9zeDNP2wqLoevyKGcaEyFYHYpIx2KK46nLWthnHiHugmkKw48kJsL8IjMO1bL3T1Zwt8bvQDTTUHTgB3GqZ2RU2asRzF1jVg0rLw3LWXXTq0YF1CsbhlWpYOuCEpH5bB8zkBlbKXR4At_M46AL8rJqn5c6BrPD5PP8",
+    videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     specs: [
       { icon: "king_bed", label: "2" },
-      { icon: "waves", label: "Cascada" },
-      { icon: "local_fire_department", label: "Asador" },
+      { icon: "bathtub", label: "1" },
+      { icon: "square_foot", label: "95m²" },
     ],
   },
   {
@@ -412,11 +452,8 @@ export const marketUpdates: Property[] = [
       "Terreno con acceso a río propio en la zona de Pago Pago, Micos, ideal para desarrollo turístico o casa de descanso.",
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuBGq4Phm0uDzCnjHAsnWpYTBVpOds_M6iOsJuRQQA5eUZHkztGgtc7eh_OE6wBeyW1-iZh7yyhROnvvmqkAZ9tyAWFGXk0FG52zU4kZ_EDLA0U0cRszy7byNXTeWe0_hS53SYmtCTEV8Y1AM-WxiIC38UMa15QwFDjXtCGQOxoh35K0Ol_70vfsxm0VqDbaWkr8tcEbLTLy0NXH_GcpGK4lAXizgxYOIlFWGyau-4OIfPZRpjCBDbz_qu3VlN201UUJGiuM9ajVd-U",
-    specs: [
-      { icon: "terrain", label: "Terreno" },
-      { icon: "square_foot", label: "2500m²" },
-      { icon: "waves", label: "Río" },
-    ],
+    videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    specs: [{ icon: "square_foot", label: "2500m²" }],
   },
   {
     id: "mu-16",
@@ -430,10 +467,11 @@ export const marketUpdates: Property[] = [
       "Villa residencial en renta mensual con alberca y jardín, en zona privada y segura de Ciudad Valles.",
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuCra-FKp81t0_OM8bWD55m2o9OOSnR_v7D0UilyExMImxyIcr9tIMZ2Py3HcC0ra_MtSsBkduMcwxUNKI9_iSXFFr_YRON1SF9hNM3fcYy-uG7N7uusL0Z367WINi1V7_GwfNQx-gsbUqLtzVi4ivFyqFQGb4qBs79bALeSFb6i3_ZnJnI1VVrN-VeZYHjfYyQI5C6zy90N3uxWZpwzIBhNoUDKKQjQ8EOEYPoyPTzhnh6b6AS3dkkFJ8t4xSDC6qjhMrQUoUPnAeM",
+    videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     specs: [
       { icon: "king_bed", label: "3" },
       { icon: "bathtub", label: "2" },
-      { icon: "pool", label: "Alberca" },
+      { icon: "square_foot", label: "230m²" },
     ],
   },
 ];

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Heart, MapPin } from "lucide-react";
 import { Property } from "@/data/mockProperties";
 import { SpecIcon } from "@/lib/spec-icon";
+import { CategoryBadge } from "@/components/properties/CategoryBadge";
 
 interface FeaturedCarouselProps {
   properties: Property[];
@@ -56,13 +57,10 @@ export function FeaturedCarousel({ properties, isFavorite, onToggleFavorite }: F
                       className="object-cover transition-transform duration-700 group-hover:scale-105"
                       src={property.imageUrl}
                     />
-                    {property.badge && (
-                      <div className={`absolute top-4 left-4 px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider ${
-                        property.badge.variant === 'primary' ? 'bg-primary text-white' : 'bg-sahara-dim text-on-surface'
-                      }`}>
-                        {property.badge.text}
-                      </div>
-                    )}
+                    <CategoryBadge category={property.category} className="absolute top-4 left-4" />
+                    <div className={`absolute bottom-4 left-4 text-white text-xs font-extrabold px-3 py-1.5 rounded-lg ${property.type === 'VENTA' ? 'bg-on-surface' : 'bg-primary'}`}>
+                      EN {property.type}
+                    </div>
                     <button
                       onClick={(e) => {
                         e.preventDefault();
@@ -83,7 +81,12 @@ export function FeaturedCarousel({ properties, isFavorite, onToggleFavorite }: F
                           <MapPin size={14} /> {property.location}
                         </p>
                       </div>
-                      <span className="text-xl font-extrabold text-primary">{property.price}</span>
+                      <span className="text-xl font-extrabold text-primary text-right shrink-0">
+                        {property.price}
+                        {property.priceSuffix && (
+                          <span className="block text-xs font-bold text-primary/70">{property.priceSuffix}</span>
+                        )}
+                      </span>
                     </div>
                     <div className="flex items-center gap-6 mt-6 pt-6 border-t border-outline/10">
                       {property.specs.map((spec, idx) => (

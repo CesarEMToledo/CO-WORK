@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Search, ArrowRight } from "lucide-react";
+import { Search, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { CategoryFilters } from "@/components/ui/CategoryFilters";
 import { FeaturedCarousel } from "@/components/properties/FeaturedCarousel";
 import { PropertyCard } from "@/components/properties/PropertyCard";
@@ -13,6 +13,27 @@ import { usePublishedProperties } from "@/lib/use-published-properties";
 
 type Operation = "all" | "VENTA" | "RENTA";
 
+// 8 per page = exactly 2 full rows on xl screens (xl:grid-cols-4), so pages
+// never end mid-row and the grid never feels like a wall of listings.
+const PAGE_SIZE = 8;
+
+/** Windowed page numbers with ellipsis gaps, e.g. [1, "...", 4, 5, 6, "...", 12]. */
+function getPageNumbers(current: number, total: number): (number | "...")[] {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const keep = new Set([1, 2, total - 1, total, current - 1, current, current + 1]);
+  const sorted = Array.from(keep)
+    .filter((p) => p >= 1 && p <= total)
+    .sort((a, b) => a - b);
+  const result: (number | "...")[] = [];
+  let prev = 0;
+  for (const p of sorted) {
+    if (prev && p - prev > 1) result.push("...");
+    result.push(p);
+    prev = p;
+  }
+  return result;
+}
+
 export function Home() {
   const searchParams = useSearchParams();
   const initialOp = searchParams.get("op");
@@ -21,6 +42,7 @@ export function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [operationFilter, setOperationFilter] = useState<Operation>(initialOperation);
   const [categoryFilter, setCategoryFilter] = useState<PropertyCategory | "all">("all");
+  const [page, setPage] = useState(1);
 
   const { isFavorite, toggleFavorite } = useFavorites();
   const { published } = usePublishedProperties();
@@ -37,6 +59,21 @@ export function Home() {
       return matchOperation && matchCategory && matchSearch;
     });
   }, [allMarketProperties, operationFilter, categoryFilter, searchQuery]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+
+  useEffect(() => {
+    setPage(1);
+  }, [operationFilter, categoryFilter, searchQuery]);
+
+  useEffect(() => {
+    setPage((p) => Math.min(p, totalPages));
+  }, [totalPages]);
+
+  const paginated = useMemo(
+    () => filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [filtered, page]
+  );
 
   return (
     <>
@@ -125,17 +162,57 @@ export function Home() {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filtered.map((property, idx) => (
-                <PropertyCard
-                  key={property.id}
-                  property={property}
-                  isFavorite={isFavorite(property.id)}
-                  onToggleFavorite={toggleFavorite}
-                  className={idx === 4 ? "hidden xl:flex" : idx === 5 ? "hidden lg:flex" : ""}
-                />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {paginated.map((property) => (
+                  <PropertyCard
+                    key={property.id}
+                    property={property}
+                    isFavorite={isFavorite(property.id)}
+                    onToggleFavorite={toggleFavorite}
+                  />
+                ))}
+              </div>
+
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 mt-10">
+                  <button
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                    aria-label="Página anterior"
+                    className="w-9 h-9 flex items-center justify-center rounded-lg border border-outline/20 text-on-surface disabled:opacity-40 disabled:cursor-not-allowed hover:border-primary hover:text-primary transition-colors"
+                  >
+                    <ChevronLeft size={18} />
+                  </button>
+                  {getPageNumbers(page, totalPages).map((p, idx) =>
+                    p === "..." ? (
+                      <span key={`ellipsis-${idx}`} className="px-1 text-on-surface-variant text-sm">
+                        …
+                      </span>
+                    ) : (
+                      <button
+                        key={p}
+                        onClick={() => setPage(p)}
+                        aria-current={page === p ? "page" : undefined}
+                        className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm font-bold transition-colors ${
+                          page === p ? "bg-primary text-white" : "text-on-surface-variant hover:text-primary"
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    )
+                  )}
+                  <button
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page === totalPages}
+                    aria-label="Página siguiente"
+                    className="w-9 h-9 flex items-center justify-center rounded-lg border border-outline/20 text-on-surface disabled:opacity-40 disabled:cursor-not-allowed hover:border-primary hover:text-primary transition-colors"
+                  >
+                    <ChevronRight size={18} />
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </section>
       </main>

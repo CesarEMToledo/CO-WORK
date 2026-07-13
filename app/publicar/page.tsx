@@ -5,35 +5,26 @@ import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/ui/Navbar";
 import { Footer } from "@/components/ui/Footer";
 import { usePublishedProperties } from "@/lib/use-published-properties";
-import type { Property, PropertyCategory } from "@/data/mockProperties";
+import type { Property, PropertyCategory, PropertySpec } from "@/data/mockProperties";
 import { CATEGORIES } from "@/data/mockProperties";
+import { getYouTubeVideoId } from "@/lib/youtube";
 
 const ALL_CATEGORIES: { id: PropertyCategory; label: string }[] = [
   ...CATEGORIES,
   { id: "Casa", label: "Casa" },
   { id: "Departamento", label: "Departamento" },
   { id: "Terreno", label: "Terreno" },
+  { id: "Oficina", label: "Oficina" },
+  { id: "Rancho", label: "Rancho" },
 ];
 
-const ICON_OPTIONS: { id: string; label: string }[] = [
-  { id: "king_bed", label: "Recámaras" },
-  { id: "bathtub", label: "Baños" },
-  { id: "square_foot", label: "Metros²" },
-  { id: "pool", label: "Alberca" },
-  { id: "waves", label: "Río / Cascada" },
-  { id: "forest", label: "Selva" },
-  { id: "terrain", label: "Terreno" },
-  { id: "local_fire_department", label: "Fogata / Asador" },
-  { id: "wb_sunny", label: "Terraza" },
-  { id: "grass", label: "Jardín" },
-  { id: "apartment", label: "Urbano" },
-  { id: "star", label: "Destacado" },
+// Every RENTA listing must say whether the price is per night, week, or month —
+// no more ambiguous prices site-wide.
+const RENTAL_PERIODS: { value: string; label: string }[] = [
+  { value: "/noche", label: "Por noche" },
+  { value: "/semana", label: "Por semana" },
+  { value: "/mes", label: "Por mes" },
 ];
-
-interface SpecRow {
-  icon: string;
-  label: string;
-}
 
 export default function PublicarPage() {
   const router = useRouter();
@@ -44,19 +35,14 @@ export default function PublicarPage() {
   const [operation, setOperation] = useState<"VENTA" | "RENTA">("RENTA");
   const [category, setCategory] = useState<PropertyCategory>("Cabaña");
   const [price, setPrice] = useState("");
-  const [priceSuffix, setPriceSuffix] = useState("");
+  const [priceSuffix, setPriceSuffix] = useState("/noche");
   const [imageUrl, setImageUrl] = useState("");
   const [description, setDescription] = useState("");
-  const [specs, setSpecs] = useState<SpecRow[]>([
-    { icon: "king_bed", label: "" },
-    { icon: "bathtub", label: "" },
-    { icon: "square_foot", label: "" },
-  ]);
+  const [bedrooms, setBedrooms] = useState("");
+  const [bathrooms, setBathrooms] = useState("");
+  const [squareMeters, setSquareMeters] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
   const [error, setError] = useState("");
-
-  const updateSpec = (idx: number, field: keyof SpecRow, value: string) => {
-    setSpecs((prev) => prev.map((s, i) => (i === idx ? { ...s, [field]: value } : s)));
-  };
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -64,6 +50,19 @@ export default function PublicarPage() {
       setError("Completa todos los campos obligatorios.");
       return;
     }
+    if (operation === "RENTA" && !priceSuffix) {
+      setError("Selecciona si el precio de renta es por noche, semana o mes.");
+      return;
+    }
+    if (videoUrl.trim() && !getYouTubeVideoId(videoUrl.trim())) {
+      setError("El link de video no parece ser un link válido de YouTube.");
+      return;
+    }
+
+    const specs: PropertySpec[] = [];
+    if (bedrooms.trim()) specs.push({ icon: "king_bed", label: bedrooms.trim() });
+    if (bathrooms.trim()) specs.push({ icon: "bathtub", label: bathrooms.trim() });
+    if (squareMeters.trim()) specs.push({ icon: "square_foot", label: `${squareMeters.trim()}m²` });
 
     const property: Omit<Property, "id"> = {
       title,
@@ -74,7 +73,8 @@ export default function PublicarPage() {
       category,
       description,
       imageUrl,
-      specs: specs.filter((s) => s.label.trim() !== ""),
+      specs,
+      videoUrl: videoUrl.trim() || undefined,
     };
 
     const created = addProperty(property);
@@ -116,7 +116,11 @@ export default function PublicarPage() {
               <label className="block text-sm font-bold text-on-surface mb-1.5">Operación</label>
               <select
                 value={operation}
-                onChange={(e) => setOperation(e.target.value as "VENTA" | "RENTA")}
+                onChange={(e) => {
+                  const next = e.target.value as "VENTA" | "RENTA";
+                  setOperation(next);
+                  setPriceSuffix(next === "RENTA" ? "/noche" : "");
+                }}
                 className="w-full px-4 py-2.5 rounded-lg border border-outline/20 bg-white focus:ring-2 focus:ring-primary outline-none"
               >
                 <option value="RENTA">Renta</option>
@@ -148,13 +152,30 @@ export default function PublicarPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-bold text-on-surface mb-1.5">Sufijo (opcional)</label>
-              <input
-                value={priceSuffix}
-                onChange={(e) => setPriceSuffix(e.target.value)}
-                placeholder="/noche, /mes, MXN"
-                className="w-full px-4 py-2.5 rounded-lg border border-outline/20 bg-white focus:ring-2 focus:ring-primary outline-none"
-              />
+              {operation === "RENTA" ? (
+                <>
+                  <label className="block text-sm font-bold text-on-surface mb-1.5">Periodo de renta *</label>
+                  <select
+                    value={priceSuffix}
+                    onChange={(e) => setPriceSuffix(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-lg border border-outline/20 bg-white focus:ring-2 focus:ring-primary outline-none"
+                  >
+                    {RENTAL_PERIODS.map((p) => (
+                      <option key={p.value} value={p.value}>{p.label}</option>
+                    ))}
+                  </select>
+                </>
+              ) : (
+                <>
+                  <label className="block text-sm font-bold text-on-surface mb-1.5">Sufijo (opcional)</label>
+                  <input
+                    value={priceSuffix}
+                    onChange={(e) => setPriceSuffix(e.target.value)}
+                    placeholder="MXN"
+                    className="w-full px-4 py-2.5 rounded-lg border border-outline/20 bg-white focus:ring-2 focus:ring-primary outline-none"
+                  />
+                </>
+              )}
             </div>
           </div>
 
@@ -181,27 +202,56 @@ export default function PublicarPage() {
 
           <div>
             <label className="block text-sm font-bold text-on-surface mb-2">Características (opcional)</label>
-            <div className="space-y-2">
-              {specs.map((spec, idx) => (
-                <div key={idx} className="flex flex-col sm:flex-row gap-2">
-                  <select
-                    value={spec.icon}
-                    onChange={(e) => updateSpec(idx, "icon", e.target.value)}
-                    className="w-full sm:w-40 sm:shrink-0 px-3 py-2 rounded-lg border border-outline/20 bg-white text-sm focus:ring-2 focus:ring-primary outline-none"
-                  >
-                    {ICON_OPTIONS.map((opt) => (
-                      <option key={opt.id} value={opt.id}>{opt.label}</option>
-                    ))}
-                  </select>
-                  <input
-                    value={spec.label}
-                    onChange={(e) => updateSpec(idx, "label", e.target.value)}
-                    placeholder="Ej. 2 Hab"
-                    className="flex-1 min-w-0 px-3 py-2 rounded-lg border border-outline/20 bg-white text-sm focus:ring-2 focus:ring-primary outline-none"
-                  />
-                </div>
-              ))}
+            <div className={`grid gap-4 ${category === "Terreno" ? "grid-cols-1" : "grid-cols-3"}`}>
+              {category !== "Terreno" && (
+                <>
+                  <div>
+                    <label className="block text-xs font-semibold text-on-surface-variant mb-1">Recámaras</label>
+                    <input
+                      value={bedrooms}
+                      onChange={(e) => setBedrooms(e.target.value)}
+                      inputMode="decimal"
+                      placeholder="Ej. 3"
+                      className="w-full px-3 py-2 rounded-lg border border-outline/20 bg-white text-sm focus:ring-2 focus:ring-primary outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-on-surface-variant mb-1">Baños</label>
+                    <input
+                      value={bathrooms}
+                      onChange={(e) => setBathrooms(e.target.value)}
+                      inputMode="decimal"
+                      placeholder="Ej. 2"
+                      className="w-full px-3 py-2 rounded-lg border border-outline/20 bg-white text-sm focus:ring-2 focus:ring-primary outline-none"
+                    />
+                  </div>
+                </>
+              )}
+              <div>
+                <label className="block text-xs font-semibold text-on-surface-variant mb-1">Metros²</label>
+                <input
+                  value={squareMeters}
+                  onChange={(e) => setSquareMeters(e.target.value)}
+                  inputMode="decimal"
+                  placeholder="Ej. 250"
+                  className="w-full px-3 py-2 rounded-lg border border-outline/20 bg-white text-sm focus:ring-2 focus:ring-primary outline-none"
+                />
+              </div>
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-on-surface mb-1.5">Video de YouTube (opcional)</label>
+            <input
+              value={videoUrl}
+              onChange={(e) => setVideoUrl(e.target.value)}
+              placeholder="https://www.youtube.com/watch?v=..."
+              className="w-full px-4 py-2.5 rounded-lg border border-outline/20 bg-white focus:ring-2 focus:ring-primary outline-none"
+            />
+            <p className="text-xs text-on-surface-variant mt-1.5">
+              Pega el link de un video en YouTube con el recorrido de la propiedad — no almacenamos archivos de
+              video, solo el enlace.
+            </p>
           </div>
 
           {error && <p className="text-sm font-medium text-red-600">{error}</p>}
