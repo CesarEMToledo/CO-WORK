@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
 import "./globals.css";
+import { IntroGate } from "@/components/IntroGate";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -8,8 +9,9 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "Luxe Estate - CO-WORK Huasteca",
-  description: "Encuentra tu santuario en la Huasteca.",
+  title: "CO-WORK Ciudad Valles - Bienes raíces en la Huasteca Potosina",
+  description:
+    "Encuentra o publica villas, cabañas, ecolodges y terrenos en venta y renta en Ciudad Valles y la Huasteca Potosina.",
 };
 
 export default function RootLayout({
@@ -23,11 +25,15 @@ export default function RootLayout({
       className={`${manrope.variable} h-full antialiased`}
     >
       <head>
-        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
-        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{if(sessionStorage.getItem('cw_intro_seen')==='1'){document.documentElement.setAttribute('data-intro-seen','1')}}catch(e){}",
+          }}
+        />
       </head>
       <body className="min-h-full flex flex-col font-sans selection:bg-primary selection:text-white bg-background text-on-surface">
-        {children}
+        <IntroGate>{children}</IntroGate>
       </body>
     </html>
   );

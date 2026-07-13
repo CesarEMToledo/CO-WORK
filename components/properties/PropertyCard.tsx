@@ -1,12 +1,40 @@
+import Image from "next/image";
+import Link from "next/link";
+import { Heart } from "lucide-react";
 import { Property } from "@/data/mockProperties";
+import { SpecIcon } from "@/lib/spec-icon";
 
-export function PropertyCard({ property, className = "" }: { property: Property; className?: string }) {
+interface PropertyCardProps {
+  property: Property;
+  className?: string;
+  isFavorite?: boolean;
+  onToggleFavorite?: (id: string) => void;
+}
+
+export function PropertyCard({ property, className = "", isFavorite = false, onToggleFavorite }: PropertyCardProps) {
   return (
-    <article className={`bg-white rounded-lg overflow-hidden shadow-card hover:shadow-soft transition-all duration-300 group cursor-pointer h-full flex flex-col ${className}`}>
+    <Link
+      href={`/propiedad/${property.id}`}
+      className={`bg-white rounded-lg overflow-hidden shadow-card hover:shadow-soft transition-all duration-300 group cursor-pointer h-full flex flex-col ${className}`}
+    >
       <div className="relative aspect-[4/3] overflow-hidden">
-        <img alt={property.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" src={property.imageUrl} />
-        <button className="absolute top-3 right-3 p-2 bg-white/90 rounded-lg hover:bg-primary hover:text-white transition-colors text-on-surface">
-          <span className="material-icons text-lg">favorite_border</span>
+        <Image
+          alt={property.title}
+          fill
+          sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+          className="object-cover transition-transform duration-500 group-hover:scale-110"
+          src={property.imageUrl}
+        />
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            onToggleFavorite?.(property.id);
+          }}
+          aria-label={isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}
+          aria-pressed={isFavorite}
+          className="absolute top-3 right-3 p-2 bg-white/90 rounded-lg hover:bg-primary hover:text-white transition-colors text-on-surface"
+        >
+          <Heart size={18} fill={isFavorite ? "currentColor" : "none"} className={isFavorite ? "text-primary" : ""} />
         </button>
         <div className={`absolute bottom-3 left-3 text-white text-[10px] font-extrabold px-2 py-1 rounded-lg ${property.type === 'VENTA' ? 'bg-on-surface' : 'bg-primary'}`}>
           EN {property.type}
@@ -21,11 +49,11 @@ export function PropertyCard({ property, className = "" }: { property: Property;
         <div className="mt-auto flex items-center justify-between pt-3 border-t border-outline/10">
           {property.specs.map((spec, idx) => (
             <div key={idx} className="flex items-center gap-1 text-on-surface-variant text-xs font-bold">
-              <span className="material-icons text-sm text-primary">{spec.icon}</span> {spec.label}
+              <SpecIcon name={spec.icon} className="w-4 h-4 text-primary" /> {spec.label}
             </div>
           ))}
         </div>
       </div>
-    </article>
+    </Link>
   );
 }

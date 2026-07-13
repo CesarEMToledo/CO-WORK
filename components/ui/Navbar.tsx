@@ -1,52 +1,108 @@
-import Link from 'next/link';
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Search, Bell, Globe, ChevronDown, Check, Plus, Menu, X, Heart } from "lucide-react";
+import { CoworkLogo } from "@/components/CoworkLogo";
 
 export function Navbar() {
+  const pathname = usePathname();
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const navLink = (href: string, label: string, className = "") => (
+    <Link
+      href={href}
+      onClick={() => setMenuOpen(false)}
+      className={
+        (pathname === href
+          ? "text-primary font-bold text-sm border-b-2 border-primary px-1 py-1"
+          : "text-on-surface-variant hover:text-primary font-semibold text-sm px-1 py-1 transition-all") +
+        " " +
+        className
+      }
+    >
+      {label}
+    </Link>
+  );
+
   return (
     <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-outline/10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
-          <div className="flex-shrink-0 flex items-center gap-2 cursor-pointer">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="material-icons text-white text-lg">nature_people</span>
-            </div>
-            <span className="text-xl font-extrabold tracking-tight text-on-surface uppercase">CO-WORK</span>
-          </div>
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16 sm:h-20">
+          <Link href="/" className="shrink-0 flex items-center gap-2 cursor-pointer">
+            <CoworkLogo className="w-8 h-8 sm:w-9 sm:h-9" />
+            <span className="text-lg sm:text-xl font-extrabold tracking-tight text-on-surface uppercase">CO-WORK</span>
+          </Link>
           <div className="hidden md:flex items-center space-x-8">
-            <Link href="#" className="text-primary font-bold text-sm border-b-2 border-primary px-1 py-1">Inicio</Link>
-            <Link href="#" className="text-on-surface-variant hover:text-primary font-semibold text-sm px-1 py-1 transition-all">Compra</Link>
-            <Link href="#" className="text-on-surface-variant hover:text-primary font-semibold text-sm px-1 py-1 transition-all">Renta</Link>
-            <Link href="#" className="text-on-surface-variant hover:text-primary font-semibold text-sm px-1 py-1 transition-all">Favoritos</Link>
+            {navLink("/", "Inicio")}
+            {navLink("/?op=venta", "Compra")}
+            {navLink("/?op=renta", "Renta")}
+            {navLink("/favoritos", "Favoritos")}
           </div>
-          <div className="flex items-center space-x-6">
-            <div className="relative group">
-              <button className="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors font-bold text-sm py-2">
-                <span className="material-symbols-outlined text-xl">language</span>
+          <div className="flex items-center gap-3 sm:gap-6">
+            <Link
+              href="/publicar"
+              className="hidden sm:flex items-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary/90 text-white font-bold text-sm rounded-lg transition-colors"
+            >
+              <Plus size={16} />
+              Publicar
+            </Link>
+            <div className="relative group hidden md:block">
+              <button aria-label="Cambiar idioma" className="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors font-bold text-sm py-2">
+                <Globe size={18} />
                 <span className="text-sm">ES</span>
-                <span className="material-symbols-outlined text-lg">expand_more</span>
+                <ChevronDown size={16} />
               </button>
               <div className="absolute top-full right-0 mt-1 w-24 bg-white rounded-lg shadow-soft border border-outline/10 py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-                <Link href="#" className="flex items-center justify-between px-4 py-2 text-xs font-bold text-primary bg-primary/5">
+                <div className="flex items-center justify-between px-4 py-2 text-xs font-bold text-primary bg-primary/5">
                   <span>ES</span>
-                  <span className="material-symbols-outlined text-sm">check</span>
-                </Link>
-                <Link href="#" className="block px-4 py-2 text-xs font-bold text-on-surface-variant hover:text-primary hover:bg-primary/5">EN</Link>
+                  <Check size={14} />
+                </div>
+                <button className="w-full text-left block px-4 py-2 text-xs font-bold text-on-surface-variant hover:text-primary hover:bg-primary/5">EN</button>
               </div>
             </div>
-            <button className="text-on-surface-variant hover:text-primary transition-colors">
-              <span className="material-icons">search</span>
+            <button aria-label="Buscar" className="hidden sm:inline-flex text-on-surface-variant hover:text-primary transition-colors">
+              <Search size={20} />
             </button>
-            <button className="text-on-surface-variant hover:text-primary transition-colors relative">
-              <span className="material-icons">notifications_none</span>
+            <button aria-label="Notificaciones" className="hidden md:inline-flex text-on-surface-variant hover:text-primary transition-colors relative">
+              <Bell size={20} />
               <span className="absolute top-0 right-0 w-2 h-2 bg-primary rounded-full border-2 border-background"></span>
             </button>
-            <button className="flex items-center gap-2 pl-2 border-l border-outline/20 ml-2">
-              <div className="w-9 h-9 rounded-full bg-sahara-dim overflow-hidden ring-2 ring-transparent hover:ring-primary transition-all">
-                <img alt="Perfil" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAWhQZ663Bd08kmzjbOPmUk4UIxYooNONShMEFXLR-DtmVi6Oz-TiaY77SPwFk7g0OobkeZEOMvt6v29mSOD0Xm2g95WbBG3ZjWXmiABOUwGU0LOySRfVDo-JTXQ0-gtwjWxbmue0qDm91m-zEOEZwAW6iRFB1qC1bAU-wkjxm67Sbztq8w7srHkFT9bVEC86qG-FzhOBTomhAurNRmx9l8Yfqabk328NfdKuVLckgCdaPsNFE3yN65MeoRi05GA_gXIMwG4YDIeA" />
-              </div>
+            <button
+              onClick={() => setMenuOpen((v) => !v)}
+              aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"}
+              aria-expanded={menuOpen}
+              className="md:hidden text-on-surface-variant hover:text-primary transition-colors"
+            >
+              {menuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
         </div>
       </div>
+
+      {menuOpen && (
+        <div className="md:hidden border-t border-outline/10 bg-background px-4 py-4 space-y-1">
+          {navLink("/", "Inicio", "block py-2")}
+          {navLink("/?op=venta", "Compra", "block py-2")}
+          {navLink("/?op=renta", "Renta", "block py-2")}
+          <Link
+            href="/favoritos"
+            onClick={() => setMenuOpen(false)}
+            className="flex items-center gap-2 py-2 text-on-surface-variant hover:text-primary font-semibold text-sm transition-all"
+          >
+            <Heart size={16} /> Favoritos
+          </Link>
+          <Link
+            href="/publicar"
+            onClick={() => setMenuOpen(false)}
+            className="flex items-center justify-center gap-1.5 mt-3 px-4 py-2.5 bg-primary hover:bg-primary/90 text-white font-bold text-sm rounded-lg transition-colors"
+          >
+            <Plus size={16} />
+            Publicar propiedad
+          </Link>
+        </div>
+      )}
     </nav>
   );
 }
