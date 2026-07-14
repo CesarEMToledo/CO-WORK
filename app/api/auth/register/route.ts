@@ -11,7 +11,6 @@ const registerSchema = z.object({
     .min(8, "La contraseña debe tener al menos 8 caracteres")
     .regex(/[A-Z]/, "Debe incluir al menos una mayúscula")
     .regex(/[0-9]/, "Debe incluir al menos un número"),
-  role: z.enum(["client", "agent", "broker", "admin"]),
   siteId: z.string().min(1, "Selecciona una sede"),
 });
 
@@ -29,7 +28,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const { name, email, password, role, siteId } = parsed.data;
+  const { name, email, password, siteId } = parsed.data;
 
   const site = await prisma.site.findUnique({ where: { id: siteId } });
   if (!site) {
@@ -48,9 +47,7 @@ export async function POST(request: Request) {
       name,
       email,
       passwordHash,
-      role,
       siteId,
-      accessLevel: role === "admin" ? "site" : undefined,
     },
   });
 
