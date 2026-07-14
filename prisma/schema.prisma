@@ -52,6 +52,19 @@ enum ReservationStatus {
   completed
 }
 
+enum IssueCategory {
+  maintenance
+  cleaning
+  internet
+  other
+}
+
+enum IssueStatus {
+  open
+  in_progress
+  resolved
+}
+
 model Site {
   id         String     @id @default(cuid())
   name       String
@@ -77,6 +90,7 @@ model User {
 
   reservations Reservation[]
   assignments  PropertyAssignment[]
+  issueReports IssueReport[]
 
   @@index([role, siteId])
 }
@@ -123,6 +137,25 @@ model Reservation {
   totalPrice Decimal            @db.Decimal(10, 2)
   createdAt  DateTime           @default(now())
 
+  issueReports IssueReport[]
+
   @@index([userId])
   @@index([propertyId, startAt, endAt])
+}
+
+model IssueReport {
+  id            String        @id @default(cuid())
+  reservationId String
+  reservation   Reservation   @relation(fields: [reservationId], references: [id])
+  userId        String
+  user          User          @relation(fields: [userId], references: [id])
+  category      IssueCategory
+  description   String
+  photos        String[]      @default([])
+  status        IssueStatus   @default(open)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([status])
+  @@index([userId])
 }

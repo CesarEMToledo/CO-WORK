@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { Search, Bell, Globe, ChevronDown, Check, Plus, Menu, X, Heart, User, LogOut, ShieldCheck } from "lucide-react";
+import { Search, Bell, Globe, ChevronDown, Check, Plus, Menu, X, Heart, User, LogOut, ShieldCheck, BarChart3, AlertTriangle, Wrench } from "lucide-react";
 import { CoworkLogo } from "@/components/CoworkLogo";
 
 export function Navbar() {
@@ -82,10 +82,21 @@ export function Navbar() {
                 </button>
                 <div className="absolute top-full right-0 mt-1 w-48 bg-white rounded-lg shadow-soft border border-outline/10 py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
                   {user.role === "admin" && (
-                    <Link href="/admin" className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-on-surface-variant hover:text-primary hover:bg-primary/5">
-                      <ShieldCheck size={14} /> Panel admin
-                    </Link>
+                    <>
+                      <Link href="/admin" className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-on-surface-variant hover:text-primary hover:bg-primary/5">
+                        <ShieldCheck size={14} /> Panel admin
+                      </Link>
+                      <Link href="/admin/reportes" className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-on-surface-variant hover:text-primary hover:bg-primary/5">
+                        <BarChart3 size={14} /> Reportes
+                      </Link>
+                      <Link href="/admin/incidencias" className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-on-surface-variant hover:text-primary hover:bg-primary/5">
+                        <Wrench size={14} /> Incidencias
+                      </Link>
+                    </>
                   )}
+                  <Link href="/reportes" className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-on-surface-variant hover:text-primary hover:bg-primary/5">
+                    <AlertTriangle size={14} /> Reportar problema
+                  </Link>
                   <button
                     onClick={() => signOut({ callbackUrl: "/" })}
                     className="w-full flex items-center gap-2 text-left px-4 py-2 text-xs font-bold text-on-surface-variant hover:text-primary hover:bg-primary/5"
@@ -128,14 +139,37 @@ export function Navbar() {
           {status === "authenticated" && user ? (
             <>
               {user.role === "admin" && (
-                <Link
-                  href="/admin"
-                  onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-2 py-2 text-on-surface-variant hover:text-primary font-semibold text-sm transition-all"
-                >
-                  <ShieldCheck size={16} /> Panel admin
-                </Link>
+                <>
+                  <Link
+                    href="/admin"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-2 py-2 text-on-surface-variant hover:text-primary font-semibold text-sm transition-all"
+                  >
+                    <ShieldCheck size={16} /> Panel admin
+                  </Link>
+                  <Link
+                    href="/admin/reportes"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-2 py-2 text-on-surface-variant hover:text-primary font-semibold text-sm transition-all"
+                  >
+                    <BarChart3 size={16} /> Reportes
+                  </Link>
+                  <Link
+                    href="/admin/incidencias"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-2 py-2 text-on-surface-variant hover:text-primary font-semibold text-sm transition-all"
+                  >
+                    <Wrench size={16} /> Incidencias
+                  </Link>
+                </>
               )}
+              <Link
+                href="/reportes"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-2 py-2 text-on-surface-variant hover:text-primary font-semibold text-sm transition-all"
+              >
+                <AlertTriangle size={16} /> Reportar problema
+              </Link>
               <button
                 onClick={() => {
                   setMenuOpen(false);

@@ -62,8 +62,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   callbacks: {
     authorized({ request, auth }) {
-      const isAdminRoute = request.nextUrl.pathname.startsWith("/admin");
-      if (isAdminRoute) return auth?.user?.role === "admin";
+      const { pathname } = request.nextUrl;
+      if (pathname.startsWith("/admin")) return auth?.user?.role === "admin";
+      if (pathname.startsWith("/reportes")) return !!auth?.user;
       return true;
     },
     jwt({ token, user }) {
