@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient, type Property } from "../lib/generated/prisma/client";
+import { PrismaClient, type Property, type Reservation } from "../lib/generated/prisma/client";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
@@ -123,9 +123,11 @@ async function main() {
 
   const rateTypes: Array<"hourly" | "daily" | "monthly"> = ["hourly", "daily", "monthly"];
   let resIdx = 0;
+  const reservationsByClientId = new Map<string, Reservation[]>();
   for (const client of clients) {
     const siteProps = client.siteId === huasteca.id ? huastecaProps : cdmxProps;
     const numReservations = 1 + (resIdx % 3);
+    const clientReservations: Reservation[] = [];
     for (let j = 0; j < numReservations; j++) {
       const property = siteProps[(resIdx + j) % siteProps.length];
       const rateType = rateTypes[(resIdx + j) % rateTypes.length];
@@ -135,7 +137,7 @@ async function main() {
       const status: "completed" | "confirmed" | "pending" =
         offsetDays < -1 ? "completed" : offsetDays <= 1 ? "confirmed" : "pending";
 
-      await prisma.reservation.create({
+      const reservation = await prisma.reservation.create({
         data: {
           propertyId: property.id,
           userId: client.id,
@@ -146,9 +148,26 @@ async function main() {
           totalPrice: priceFor(property, rateType),
         },
       });
+      clientReservations.push(reservation);
     }
+    reservationsByClientId.set(client.id, clientReservations);
     resIdx++;
   }
+
+  const exampleClient = clients.find((c) => c.name === "Sebastián Rojas")!;
+  const exampleReservation = reservationsByClientId
+    .get(exampleClient.id)!
+    .find((r) => r.status === "confirmed")!;
+
+  await prisma.issueReport.create({
+    data: {
+      reservationId: exampleReservation.id,
+      userId: exampleClient.id,
+      category: "maintenance",
+      description: "El proyector de la sala no enciende y tenemos una presentación con un cliente en una hora.",
+      status: "open",
+    },
+  });
 
   console.log("\nSeed completado.");
   console.log(`Sedes: Huasteca (${huasteca.id}), CDMX (${cdmx.id})`);
@@ -157,6 +176,7 @@ async function main() {
   console.log(`Admin global: ${superAdmin.email}`);
   console.log(`Admin de sede: ${siteAdmin.email}`);
   console.log(`Agentes/brokers: ${agents.map((a) => a.email).join(", ")}`);
+  console.log(`Incidencia de ejemplo: ${exampleClient.email} reportó un problema de mantenimiento`);
 }
 
 const DIACRITICS_REGEX = new RegExp("[\\u0300-\\u036f]", "g");
