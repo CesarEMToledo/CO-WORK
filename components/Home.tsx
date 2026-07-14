@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Search, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { CategoryFilters } from "@/components/ui/CategoryFilters";
@@ -62,17 +62,18 @@ export function Home() {
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
 
-  useEffect(() => {
+  const filterKey = `${operationFilter}|${categoryFilter}|${searchQuery}`;
+  const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
+  if (filterKey !== prevFilterKey) {
+    setPrevFilterKey(filterKey);
     setPage(1);
-  }, [operationFilter, categoryFilter, searchQuery]);
+  }
 
-  useEffect(() => {
-    setPage((p) => Math.min(p, totalPages));
-  }, [totalPages]);
+  const currentPage = Math.min(page, totalPages);
 
   const paginated = useMemo(
-    () => filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
-    [filtered, page]
+    () => filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
+    [filtered, currentPage]
   );
 
   return (
@@ -178,13 +179,13 @@ export function Home() {
                 <div className="flex items-center justify-center gap-2 mt-10">
                   <button
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    disabled={page === 1}
+                    disabled={currentPage === 1}
                     aria-label="Página anterior"
                     className="w-9 h-9 flex items-center justify-center rounded-lg border border-outline/20 text-on-surface disabled:opacity-40 disabled:cursor-not-allowed hover:border-primary hover:text-primary transition-colors"
                   >
                     <ChevronLeft size={18} />
                   </button>
-                  {getPageNumbers(page, totalPages).map((p, idx) =>
+                  {getPageNumbers(currentPage, totalPages).map((p, idx) =>
                     p === "..." ? (
                       <span key={`ellipsis-${idx}`} className="px-1 text-on-surface-variant text-sm">
                         …
@@ -193,9 +194,9 @@ export function Home() {
                       <button
                         key={p}
                         onClick={() => setPage(p)}
-                        aria-current={page === p ? "page" : undefined}
+                        aria-current={currentPage === p ? "page" : undefined}
                         className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm font-bold transition-colors ${
-                          page === p ? "bg-primary text-white" : "text-on-surface-variant hover:text-primary"
+                          currentPage === p ? "bg-primary text-white" : "text-on-surface-variant hover:text-primary"
                         }`}
                       >
                         {p}
@@ -204,7 +205,7 @@ export function Home() {
                   )}
                   <button
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                    disabled={page === totalPages}
+                    disabled={currentPage === totalPages}
                     aria-label="Página siguiente"
                     className="w-9 h-9 flex items-center justify-center rounded-lg border border-outline/20 text-on-surface disabled:opacity-40 disabled:cursor-not-allowed hover:border-primary hover:text-primary transition-colors"
                   >

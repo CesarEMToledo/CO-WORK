@@ -69,10 +69,12 @@ export default function PropertyDetailPage() {
   const property = [...published, ...allProperties].find((p) => p.id === params.id);
   const gallery = property ? getGalleryForProperty(property) : [];
 
-  useEffect(() => {
+  const [prevPropertyId, setPrevPropertyId] = useState(property?.id);
+  if (property?.id !== prevPropertyId) {
+    setPrevPropertyId(property?.id);
     setActiveImage(0);
     setVideoPlaying(false);
-  }, [property?.id]);
+  }
 
   useEffect(() => {
     if (gallery.length <= 1) return;
