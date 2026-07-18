@@ -39,6 +39,7 @@ export function Navbar() {
           </Link>
           <div className="hidden md:flex items-center space-x-8">
             {navLink("/", "Inicio")}
+            {navLink("/explorar", "Explorar")}
             {navLink("/?op=venta", "Compra")}
             {navLink("/?op=renta", "Renta")}
             {navLink("/favoritos", "Favoritos")}
@@ -126,6 +127,7 @@ export function Navbar() {
       {menuOpen && (
         <div className="md:hidden border-t border-outline/10 bg-background px-4 py-4 space-y-1">
           {navLink("/", "Inicio", "block py-2")}
+          {navLink("/explorar", "Explorar", "block py-2")}
           {navLink("/?op=venta", "Compra", "block py-2")}
           {navLink("/?op=renta", "Renta", "block py-2")}
           <Link

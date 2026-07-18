@@ -38,4 +38,24 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  /* Leaflet gives .leaflet-div-icon a white box + border by default, which
+     would show through behind the price-pill markers rendered as raw HTML
+     inside them (see LeafletExploreMap.tsx / PropertyMap.tsx) since Tailwind
+     can't reach into a div Leaflet builds outside of React. */
+  .leaflet-div-icon.cw-price-pin,
+  .leaflet-div-icon.cw-map-pin {
+    background: transparent;
+    border: none;
+  }
+
+  /* Price-pill markers (LeafletExploreMap.tsx): the icon box width is only an
+     estimate of the rendered price text, so let content overflow it rather
+     than clip, and center it in case the estimate is a little off. */
+  .leaflet-div-icon.cw-price-pin {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+  }
 }

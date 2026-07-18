@@ -145,9 +145,12 @@ export function getCoordinatesForProperty(property: Property): PropertyCoordinat
   const base = match ?? DEFAULT_COORDS;
 
   // Small deterministic jitter so listings in the same town don't stack on the same pin.
+  // Range is roughly ±220m — enough that two markers in the same neighborhood
+  // (e.g. two "Lomas, Cd. Valles" listings) stay visually separated on the
+  // /explorar map even at a fairly deep zoom.
   const hash = hashString(property.id);
-  const jitterLat = ((hash % 200) - 100) / 100000;
-  const jitterLng = (((hash >> 8) % 200) - 100) / 100000;
+  const jitterLat = ((hash % 400) - 200) / 100000;
+  const jitterLng = (((hash >> 8) % 400) - 200) / 100000;
 
   return { lat: base.lat + jitterLat, lng: base.lng + jitterLng };
 }

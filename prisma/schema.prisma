@@ -65,6 +65,18 @@ enum IssueStatus {
   resolved
 }
 
+enum VisitRequestType {
+  visita
+  reserva
+}
+
+enum VisitRequestStatus {
+  pending
+  contacted
+  confirmed
+  cancelled
+}
+
 model Site {
   id         String     @id @default(cuid())
   name       String
@@ -158,4 +170,31 @@ model IssueReport {
 
   @@index([status])
   @@index([userId])
+}
+
+// Visit / booking requests submitted from the public property detail page
+// ("Agendar Cita" for VENTA listings, "Reservar Espacio" for RENTA ones).
+// The public catalog still lives in data/mockProperties.ts (not this DB),
+// so we keep a denormalized snapshot of the property + assigned host
+// instead of a foreign key. Once the real-estate catalog is migrated into
+// Property, propertyId can become a proper relation.
+model VisitRequest {
+  id               String              @id @default(cuid())
+  propertyId       String
+  propertyTitle    String
+  propertyLocation String
+  type             VisitRequestType
+  requesterName    String
+  requesterPhone   String?
+  requesterEmail   String?
+  visitDate        DateTime
+  visitTime        String
+  message          String?
+  agentName        String
+  agentPhone       String
+  status           VisitRequestStatus @default(pending)
+  createdAt        DateTime           @default(now())
+
+  @@index([propertyId])
+  @@index([status])
 }

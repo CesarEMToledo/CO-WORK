@@ -112,18 +112,11 @@ export default function PropertyDetailPage() {
   const videoThumbnail = property.videoUrl ? getYouTubeThumbnailUrl(property.videoUrl) : null;
 
   const ctaLabel = property.type === "VENTA" ? "Agendar Cita" : "Reservar Espacio";
-  const agentFirstName = agent.name.split(" ")[0];
 
-  const bookingMessage = encodeURIComponent(
-    property.type === "VENTA"
-      ? `Hola ${agentFirstName}, quiero agendar una cita para conocer "${property.title}" (${property.location}).`
-      : `Hola ${agentFirstName}, quiero reservar "${property.title}" (${property.location}).`
-  );
   const generalMessage = encodeURIComponent(
     `Hola, me interesa "${property.title}" (${property.location}) que vi en CO-WORK.`
   );
 
-  const waBookingUrl = `https://wa.me/52${agent.phone}?text=${bookingMessage}`;
   const waContactUrl = `https://wa.me/52${agent.phone}?text=${generalMessage}`;
   const telUrl = `tel:+52${agent.phone}`;
   const googleMapsUrl = `https://www.google.com/maps?q=${coordinates.lat},${coordinates.lng}`;
@@ -359,14 +352,12 @@ export default function PropertyDetailPage() {
                 </div>
               </div>
 
-              <a
-                href={waBookingUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                href={`/propiedad/${property.id}/visita`}
                 className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg py-3 transition-colors"
               >
                 <Calendar size={18} /> {ctaLabel}
-              </a>
+              </Link>
             </div>
 
             <div className="bg-white rounded-lg shadow-card p-4">

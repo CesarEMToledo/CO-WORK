@@ -16,9 +16,20 @@ interface PropertyCardProps {
   className?: string;
   isFavorite?: boolean;
   onToggleFavorite?: (id: string) => void;
+  /** Used by /explorar to highlight the card that matches the hovered/selected map marker. */
+  highlighted?: boolean;
+  /** Used by /explorar to highlight the map marker that matches the hovered card. */
+  onHoverChange?: (hovering: boolean) => void;
 }
 
-export function PropertyCard({ property, className = "", isFavorite = false, onToggleFavorite }: PropertyCardProps) {
+export function PropertyCard({
+  property,
+  className = "",
+  isFavorite = false,
+  onToggleFavorite,
+  highlighted = false,
+  onHoverChange,
+}: PropertyCardProps) {
   const gallery = getGalleryForProperty(property);
   const [activeImage, setActiveImage] = useState(0);
 
@@ -33,7 +44,11 @@ export function PropertyCard({ property, className = "", isFavorite = false, onT
   return (
     <Link
       href={`/propiedad/${property.id}`}
-      className={`bg-white rounded-lg overflow-hidden shadow-card hover:shadow-soft transition-all duration-300 group cursor-pointer h-full flex flex-col ${className}`}
+      onMouseEnter={() => onHoverChange?.(true)}
+      onMouseLeave={() => onHoverChange?.(false)}
+      className={`bg-white rounded-lg overflow-hidden shadow-card hover:shadow-soft transition-all duration-300 group cursor-pointer h-full flex flex-col ${
+        highlighted ? "ring-2 ring-primary shadow-soft" : ""
+      } ${className}`}
     >
       <div className="relative aspect-[4/3] overflow-hidden">
         <Image

@@ -10,6 +10,7 @@ import { Footer } from "@/components/ui/Footer";
 import { featuredCollections, marketUpdates, type PropertyCategory } from "@/data/mockProperties";
 import { useFavorites } from "@/lib/use-favorites";
 import { usePublishedProperties } from "@/lib/use-published-properties";
+import { isPropertyAvailable } from "@/lib/property-filters";
 
 type Operation = "all" | "VENTA" | "RENTA";
 
@@ -47,7 +48,12 @@ export function Home() {
   const { isFavorite, toggleFavorite } = useFavorites();
   const { published } = usePublishedProperties();
 
-  const allMarketProperties = useMemo(() => [...published, ...marketUpdates], [published]);
+  // Sold / withdrawn listings never show up on the homepage, same rule as /explorar.
+  const allMarketProperties = useMemo(
+    () => [...published, ...marketUpdates].filter(isPropertyAvailable),
+    [published]
+  );
+  const availableFeatured = useMemo(() => featuredCollections.filter(isPropertyAvailable), []);
 
   const filtered = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -116,7 +122,7 @@ export function Home() {
               Ver todas <ArrowRight size={14} />
             </a>
           </div>
-          <FeaturedCarousel properties={featuredCollections} isFavorite={isFavorite} onToggleFavorite={toggleFavorite} />
+          <FeaturedCarousel properties={availableFeatured} isFavorite={isFavorite} onToggleFavorite={toggleFavorite} />
         </section>
 
         <section>

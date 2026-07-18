@@ -32,6 +32,16 @@ export interface PropertyBilling {
   detail?: string;
 }
 
+/** Defaults to "disponible" when a property omits `status`. */
+export type PropertyStatus = "disponible" | "vendida" | "rentada" | "no_disponible";
+
+export interface PropertyDateRange {
+  /** ISO date, "YYYY-MM-DD". */
+  start: string;
+  /** ISO date, "YYYY-MM-DD". */
+  end: string;
+}
+
 export interface Property {
   id: string;
   title: string;
@@ -51,6 +61,14 @@ export interface Property {
   images?: string[];
   /** YouTube link only — no video files are stored, just the URL. */
   videoUrl?: string;
+  /** Omit for "disponible" — search results (Home + /explorar) hide anything else. */
+  status?: PropertyStatus;
+  /**
+   * RENTA-only: already-booked date ranges (inclusive). Used by /explorar's
+   * "Fechas de tu estancia" search to hide a listing for dates it's taken.
+   * Not applicable to VENTA and safe to leave unset (means "always open").
+   */
+  bookedDates?: PropertyDateRange[];
 }
 
 export const CATEGORIES: { id: PropertyCategory; label: string }[] = [
@@ -79,6 +97,7 @@ export const featuredCollections: Property[] = [
       { icon: "bathtub", label: "3.5" },
       { icon: "square_foot", label: "320m²" },
     ],
+    bookedDates: [{ start: "2026-07-22", end: "2026-07-28" }],
   },
   {
     id: "fc-2",
@@ -98,6 +117,7 @@ export const featuredCollections: Property[] = [
       { icon: "bathtub", label: "2" },
       { icon: "square_foot", label: "140m²" },
     ],
+    bookedDates: [{ start: "2026-08-01", end: "2026-08-04" }],
   },
   {
     id: "fc-3",
@@ -155,6 +175,7 @@ export const featuredCollections: Property[] = [
       { icon: "bathtub", label: "1" },
       { icon: "square_foot", label: "45m²" },
     ],
+    status: "no_disponible",
   },
   {
     id: "fc-6",
@@ -215,6 +236,7 @@ export const marketUpdates: Property[] = [
       { icon: "bathtub", label: "1" },
       { icon: "square_foot", label: "55m²" },
     ],
+    bookedDates: [{ start: "2026-07-19", end: "2026-07-21" }],
   },
   {
     id: "mu-3",
@@ -291,6 +313,10 @@ export const marketUpdates: Property[] = [
       { icon: "bathtub", label: "2" },
       { icon: "square_foot", label: "200m²" },
     ],
+    bookedDates: [
+      { start: "2026-07-24", end: "2026-07-26" },
+      { start: "2026-08-14", end: "2026-08-18" },
+    ],
   },
   {
     id: "mu-7",
@@ -310,6 +336,7 @@ export const marketUpdates: Property[] = [
       { icon: "bathtub", label: "2" },
       { icon: "square_foot", label: "180m²" },
     ],
+    status: "vendida",
   },
   {
     id: "mu-8",
@@ -344,6 +371,7 @@ export const marketUpdates: Property[] = [
       "https://lh3.googleusercontent.com/aida-public/AB6AXuBGq4Phm0uDzCnjHAsnWpYTBVpOds_M6iOsJuRQQA5eUZHkztGgtc7eh_OE6wBeyW1-iZh7yyhROnvvmqkAZ9tyAWFGXk0FG52zU4kZ_EDLA0U0cRszy7byNXTeWe0_hS53SYmtCTEV8Y1AM-WxiIC38UMa15QwFDjXtCGQOxoh35K0Ol_70vfsxm0VqDbaWkr8tcEbLTLy0NXH_GcpGK4lAXizgxYOIlFWGyau-4OIfPZRpjCBDbz_qu3VlN201UUJGiuM9ajVd-U",
     videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     specs: [{ icon: "square_foot", label: "1200m²" }],
+    status: "no_disponible",
   },
   {
     id: "mu-10",
