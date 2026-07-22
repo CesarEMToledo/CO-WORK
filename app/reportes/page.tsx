@@ -1,12 +1,12 @@
-import { auth } from "@/auth";
+import { getCurrentUser } from "@/lib/current-user";
 import { Navbar } from "@/components/ui/Navbar";
 import { Footer } from "@/components/ui/Footer";
 import { ReportIssueForm } from "@/components/ReportIssueForm";
 import { prisma } from "@/lib/prisma";
 
 export default async function ReportarProblemaPage() {
-  const session = await auth();
-  const userId = session!.user.id;
+  const user = await getCurrentUser();
+  const userId = user!.id;
 
   const reservations = await prisma.reservation.findMany({
     where: { userId, status: { in: ["pending", "confirmed"] } },

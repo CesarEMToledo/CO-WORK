@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/permissions";
+import { setUserRoleClaim } from "@/lib/supabase/admin";
 
 const bodySchema = z.object({
   role: z.enum(["client", "agent", "broker", "admin"]),
@@ -30,6 +31,14 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       accessLevel: parsed.data.role === "admin" ? (user.accessLevel ?? "site") : null,
     },
   });
+
+  try {
+    await setUserRoleClaim(updated.authId, updated.role);
+  } catch (err) {
+    // El perfil ya quedó actualizado; si esto falla, el usuario seguirá
+    // viendo su rol anterior en el proxy hasta que se sincronice a mano.
+    console.error("No se pudo sincronizar app_metadata.role con Supabase:", err);
+  }
 
   return NextResponse.json({ id: updated.id, role: updated.role });
 }

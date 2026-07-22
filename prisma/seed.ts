@@ -1,15 +1,79 @@
-import bcrypt from "bcryptjs";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient, type Property, type Reservation } from "../lib/generated/prisma/client";
+import { createAdminClient } from "../lib/supabase/admin";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
+const supabaseAdmin = createAdminClient();
 
 const DEV_PASSWORD = "Password123!";
 
-async function main() {
-  const passwordHash = await bcrypt.hash(DEV_PASSWORD, 10);
+// Crea (o reutiliza, si ya existe por una corrida anterior del seed) el
+// usuario en Supabase Auth y devuelve su id (auth.users.id / uuid). Ese id es
+// el que guardamos como `authId` en nuestra tabla User.
+async function upsertAuthUser(email: string, password: string, meta: { name: string; role: string }) {
+  const created = await supabaseAdmin.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+    user_metadata: { name: meta.name },
+    app_metadata: { role: meta.role },
+  });
 
+  if (!created.error) return created.data.user.id;
+
+  if (!/already.*registered/i.test(created.error.message)) {
+    throw created.error;
+  }
+
+  // Ya existe: lo localizamos por correo y refrescamos su contraseña/metadata
+  // para que quede en el mismo estado que definimos aquí.
+  let existingId: string | undefined;
+  for (let page = 1; page <= 10 && !existingId; page++) {
+    const { data, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage: 200 });
+    if (error) throw error;
+    existingId = data.users.find((u) => u.email === email)?.id;
+    if (data.users.length < 200) break;
+  }
+  if (!existingId) {
+    throw new Error(`No se pudo localizar el usuario de Supabase Auth existente para ${email}`);
+  }
+
+  const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(existingId, {
+    password,
+    user_metadata: { name: meta.name },
+    app_metadata: { role: meta.role },
+  });
+  if (updateError) throw updateError;
+
+  return existingId;
+}
+
+async function createSeedUser(data: {
+  name: string;
+  email: string;
+  role: "client" | "agent" | "broker" | "admin";
+  siteId: string;
+  accessLevel?: "site" | "global";
+  status?: "active" | "inactive" | "away";
+  lastLoginAt?: Date;
+}) {
+  const authId = await upsertAuthUser(data.email, DEV_PASSWORD, { name: data.name, role: data.role });
+  return prisma.user.create({
+    data: {
+      authId,
+      name: data.name,
+      email: data.email,
+      role: data.role,
+      siteId: data.siteId,
+      accessLevel: data.accessLevel,
+      status: data.status ?? "active",
+      lastLoginAt: data.lastLoginAt,
+    },
+  });
+}
+
+async function main() {
   await prisma.reservation.deleteMany();
   await prisma.propertyAssignment.deleteMany();
   await prisma.property.deleteMany();
@@ -19,30 +83,24 @@ async function main() {
   const huasteca = await prisma.site.create({ data: { name: "Huasteca", code: "HUA" } });
   const cdmx = await prisma.site.create({ data: { name: "Ciudad de México", code: "CDMX" } });
 
-  const superAdmin = await prisma.user.create({
-    data: {
-      name: "Laura Sánchez",
-      email: "admin@cowork.mx",
-      passwordHash,
-      role: "admin",
-      accessLevel: "global",
-      siteId: huasteca.id,
-      status: "active",
-      lastLoginAt: new Date(),
-    },
+  const superAdmin = await createSeedUser({
+    name: "Laura Sánchez",
+    email: "admin@cowork.mx",
+    role: "admin",
+    accessLevel: "global",
+    siteId: huasteca.id,
+    status: "active",
+    lastLoginAt: new Date(),
   });
 
-  const siteAdmin = await prisma.user.create({
-    data: {
-      name: "Marco Torres",
-      email: "admin.huasteca@cowork.mx",
-      passwordHash,
-      role: "admin",
-      accessLevel: "site",
-      siteId: huasteca.id,
-      status: "active",
-      lastLoginAt: daysAgo(1),
-    },
+  const siteAdmin = await createSeedUser({
+    name: "Marco Torres",
+    email: "admin.huasteca@cowork.mx",
+    role: "admin",
+    accessLevel: "site",
+    siteId: huasteca.id,
+    status: "active",
+    lastLoginAt: daysAgo(1),
   });
 
   const agentsData = [
@@ -54,11 +112,7 @@ async function main() {
 
   const agents = [];
   for (const a of agentsData) {
-    agents.push(
-      await prisma.user.create({
-        data: { ...a, passwordHash, status: "active", lastLoginAt: daysAgo(2) },
-      })
-    );
+    agents.push(await createSeedUser({ ...a, status: "active", lastLoginAt: daysAgo(2) }));
   }
 
   const clientNames = [
@@ -75,16 +129,13 @@ async function main() {
     const email = `${slug(name)}@example.com`;
     const status = statuses[i % statuses.length];
     clients.push(
-      await prisma.user.create({
-        data: {
-          name,
-          email,
-          passwordHash,
-          role: "client",
-          siteId: i % 2 === 0 ? huasteca.id : cdmx.id,
-          status,
-          lastLoginAt: status === "inactive" ? daysAgo(120) : daysAgo(i + 1),
-        },
+      await createSeedUser({
+        name,
+        email,
+        role: "client",
+        siteId: i % 2 === 0 ? huasteca.id : cdmx.id,
+        status,
+        lastLoginAt: status === "inactive" ? daysAgo(120) : daysAgo(i + 1),
       })
     );
   }
@@ -169,11 +220,11 @@ async function main() {
     },
   });
 
-  console.log("\nSeed completado.");
+  console.log("\nSeed completado (perfiles + usuarios de Supabase Auth).");
   console.log(`Sedes: Huasteca (${huasteca.id}), CDMX (${cdmx.id})`);
   console.log(`Usuarios creados: ${2 + agents.length + clients.length}`);
   console.log(`Contraseña de todos los usuarios: ${DEV_PASSWORD}`);
-  console.log(`Admin global: ${superAdmin.email}`);
+  console.log(`Admin global (usuario genérico de prueba): ${superAdmin.email}`);
   console.log(`Admin de sede: ${siteAdmin.email}`);
   console.log(`Agentes/brokers: ${agents.map((a) => a.email).join(", ")}`);
   console.log(`Incidencia de ejemplo: ${exampleClient.email} reportó un problema de mantenimiento`);

@@ -6,6 +6,11 @@ generator client {
   output   = "../lib/generated/prisma"
 }
 
+// DATABASE_URL (definida en prisma.config.ts, ver ese archivo) debe ser la
+// conexión Postgres de tu proyecto de Supabase (Project Settings -> Database
+// -> Connection string). Usa el "Session pooler" (puerto 5432) o la conexión
+// directa — el pooler en modo "Transaction" (puerto 6543) no es compatible
+// con @prisma/adapter-pg.
 datasource db {
   provider = "postgresql"
 }
@@ -88,9 +93,14 @@ model Site {
 
 model User {
   id           String       @id @default(cuid())
+  // Id del usuario en Supabase Auth (auth.users.id). La contraseña y el login
+  // con Google los maneja Supabase; aquí solo guardamos el perfil de la app.
+  authId       String       @unique
   name         String
   email        String       @unique
-  passwordHash String
+  phone        String?
+  // URL pública del archivo en el bucket "avatars" de Supabase Storage.
+  avatarUrl    String?
   role         Role         @default(client)
   accessLevel  AccessLevel?
   status       UserStatus   @default(active)

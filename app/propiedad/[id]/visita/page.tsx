@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
+import { useSupabaseUser } from "@/components/SessionProviderWrapper";
 import {
   ArrowLeft,
   MapPin,
@@ -88,7 +88,7 @@ function getMonthMatrix(viewDate: Date): CalendarCell[] {
 export default function ScheduleVisitPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const { data: session } = useSession();
+  const { user: authUser } = useSupabaseUser();
   const { published } = usePublishedProperties();
 
   const property = [...published, ...allProperties].find((p) => p.id === params.id);
@@ -98,7 +98,7 @@ export default function ScheduleVisitPage() {
   const [viewMonth, setViewMonth] = useState(() => new Date(today.getFullYear(), today.getMonth(), 1));
   const [selectedDate, setSelectedDate] = useState<Date>(today);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [requesterName, setRequesterName] = useState(session?.user?.name ?? "");
+  const [requesterName, setRequesterName] = useState((authUser?.user_metadata?.name as string) ?? "");
   const [requesterPhone, setRequesterPhone] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);

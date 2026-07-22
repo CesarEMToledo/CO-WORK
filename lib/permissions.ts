@@ -1,29 +1,33 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { getCurrentUser, type CurrentUser } from "@/lib/current-user";
 
-export async function requireAdmin() {
-  const session = await auth();
-  if (!session?.user || session.user.role !== "admin") {
+type Result =
+  | { session: { user: CurrentUser }; error: null }
+  | { session: null; error: ReturnType<typeof NextResponse.json> };
+
+export async function requireAdmin(): Promise<Result> {
+  const user = await getCurrentUser();
+  if (!user || user.role !== "admin") {
     return { session: null, error: NextResponse.json({ error: "No autorizado" }, { status: 403 }) };
   }
-  return { session, error: null as null };
+  return { session: { user }, error: null };
 }
 
-export async function requireSession() {
-  const session = await auth();
-  if (!session?.user) {
+export async function requireSession(): Promise<Result> {
+  const user = await getCurrentUser();
+  if (!user) {
     return { session: null, error: NextResponse.json({ error: "No autenticado" }, { status: 401 }) };
   }
-  return { session, error: null as null };
+  return { session: { user }, error: null };
 }
 
-export async function requireAdminOrSelf(userId: string) {
-  const session = await auth();
-  if (!session?.user) {
+export async function requireAdminOrSelf(userId: string): Promise<Result> {
+  const user = await getCurrentUser();
+  if (!user) {
     return { session: null, error: NextResponse.json({ error: "No autenticado" }, { status: 401 }) };
   }
-  if (session.user.role !== "admin" && session.user.id !== userId) {
+  if (user.role !== "admin" && user.id !== userId) {
     return { session: null, error: NextResponse.json({ error: "No autorizado" }, { status: 403 }) };
   }
-  return { session, error: null as null };
+  return { session: { user }, error: null };
 }

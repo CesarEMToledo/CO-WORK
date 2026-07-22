@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/ui/Navbar";
 import { Footer } from "@/components/ui/Footer";
+import { ImageUploadField } from "@/components/ImageUploadField";
 import { usePublishedProperties } from "@/lib/use-published-properties";
 import type { Property, PropertyCategory, PropertySpec } from "@/data/mockProperties";
 import { CATEGORIES } from "@/data/mockProperties";
@@ -36,7 +37,7 @@ export default function PublicarPage() {
   const [category, setCategory] = useState<PropertyCategory>("Cabaña");
   const [price, setPrice] = useState("");
   const [priceSuffix, setPriceSuffix] = useState("/noche");
-  const [imageUrl, setImageUrl] = useState("");
+  const [images, setImages] = useState<string[]>([]);
   const [description, setDescription] = useState("");
   const [bedrooms, setBedrooms] = useState("");
   const [bathrooms, setBathrooms] = useState("");
@@ -46,8 +47,8 @@ export default function PublicarPage() {
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    if (!title || !location || !price || !imageUrl || !description) {
-      setError("Completa todos los campos obligatorios.");
+    if (!title || !location || !price || !images.length || !description) {
+      setError("Completa todos los campos obligatorios y sube al menos una foto.");
       return;
     }
     if (operation === "RENTA" && !priceSuffix) {
@@ -72,7 +73,8 @@ export default function PublicarPage() {
       type: operation,
       category,
       description,
-      imageUrl,
+      imageUrl: images[0],
+      images: images.length > 1 ? images.slice(1) : undefined,
       specs,
       videoUrl: videoUrl.trim() || undefined,
     };
@@ -180,13 +182,12 @@ export default function PublicarPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-on-surface mb-1.5">URL de imagen *</label>
-            <input
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              placeholder="https://..."
-              className="w-full px-4 py-2.5 rounded-lg border border-outline/20 bg-white focus:ring-2 focus:ring-primary outline-none"
-            />
+            <label className="block text-sm font-bold text-on-surface mb-1.5">Fotos *</label>
+            <ImageUploadField value={images} onChange={setImages} />
+            <p className="text-xs text-on-surface-variant mt-1.5">
+              La primera foto que subas es la que se usa como portada — puedes cambiar el orden quitando y
+              volviendo a subir.
+            </p>
           </div>
 
           <div>

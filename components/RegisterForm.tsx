@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
 
 interface Site {
   id: string;
@@ -18,35 +18,71 @@ export function RegisterForm({ sites }: { sites: Site[] }) {
   const [siteId, setSiteId] = useState(sites[0]?.id ?? "");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [pendingConfirmation, setPendingConfirmation] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
-    const res = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password, siteId }),
+    const supabase = createClient();
+    const { data, error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+      // Guardamos el nombre y la sede elegida en user_metadata: si tu
+      // proyecto requiere confirmar el correo, /auth/callback los lee de ahí
+      // para crear el perfil cuando el usuario confirme.
+      options: { data: { name, siteId } },
     });
 
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      setError(data.error ?? "No se pudo completar el registro");
+    if (signUpError) {
+      setError(signUpError.message || "No se pudo completar el registro");
       setLoading(false);
       return;
     }
 
-    const signInResult = await signIn("credentials", { email, password, redirect: false });
+    const res = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ siteId }),
+    });
+
     setLoading(false);
 
-    if (signInResult?.error) {
-      router.push("/login");
+    if (res.status === 202) {
+      // No hay sesión todavía: el proyecto exige confirmar el correo.
+      setPendingConfirmation(true);
       return;
     }
-    router.push("/");
-    router.refresh();
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      setError(body.error ?? "No se pudo completar el registro");
+      return;
+    }
+
+    if (data.session) {
+      router.push("/");
+      router.refresh();
+    } else {
+      setPendingConfirmation(true);
+    }
   };
+
+  if (pendingConfirmation) {
+    return (
+      <div className="text-center space-y-3">
+        <p className="text-on-surface font-bold">Revisa tu correo</p>
+        <p className="text-sm text-on-surface-variant">
+          Te enviamos un enlace de confirmación a <span className="font-semibold">{email}</span>. Ábrelo
+          para activar tu cuenta.
+        </p>
+        <Link href="/login" className="text-primary font-bold underline underline-offset-2 text-sm">
+          Volver a inicio de sesión
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -81,9 +117,7 @@ export function RegisterForm({ sites }: { sites: Site[] }) {
           onChange={(e) => setPassword(e.target.value)}
           className="w-full px-4 py-2.5 rounded-lg border border-outline/20 bg-white focus:ring-2 focus:ring-primary outline-none"
         />
-        <p className="text-xs text-on-surface-variant mt-1">
-          Mínimo 8 caracteres, con al menos una mayúscula y un número.
-        </p>
+        <p className="text-xs text-on-surface-variant mt-1">Mínimo 8 caracteres.</p>
       </div>
 
       <div>

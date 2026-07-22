@@ -2,16 +2,44 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
-import { Search, Bell, Globe, ChevronDown, Check, Plus, Menu, X, Heart, User, LogOut, ShieldCheck, BarChart3, AlertTriangle, Wrench } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { Search, Bell, Globe, ChevronDown, Check, Plus, Menu, X, Heart, User, LogOut, ShieldCheck, BarChart3, AlertTriangle, Wrench, UserCog } from "lucide-react";
 import { CoworkLogo } from "@/components/CoworkLogo";
+import { useSupabaseUser } from "@/components/SessionProviderWrapper";
+import { createClient } from "@/lib/supabase/client";
 
 export function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
-  const { data: session, status } = useSession();
-  const user = session?.user;
+  const { user: authUser, status } = useSupabaseUser();
+  const user = authUser
+    ? {
+        name: (authUser.user_metadata?.name as string | undefined) ?? authUser.email ?? "Usuario",
+        role: (authUser.app_metadata?.role as string | undefined) ?? "client",
+        avatarUrl: authUser.user_metadata?.avatar_url as string | undefined,
+      }
+    : null;
+
+  const Avatar = ({ size }: { size: number }) =>
+    user?.avatarUrl ? (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={user.avatarUrl}
+        alt=""
+        style={{ width: size, height: size }}
+        className="rounded-full object-cover shrink-0"
+      />
+    ) : (
+      <User size={size} />
+    );
+
+  const signOut = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/");
+    router.refresh();
+  };
 
   const navLink = (href: string, label: string, className = "") => (
     <Link
@@ -77,11 +105,14 @@ export function Navbar() {
             {status === "authenticated" && user ? (
               <div className="relative group hidden md:block">
                 <button className="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors font-bold text-sm py-2">
-                  <User size={18} />
+                  <Avatar size={18} />
                   <span className="max-w-[120px] truncate">{user.name}</span>
                   <ChevronDown size={16} />
                 </button>
                 <div className="absolute top-full right-0 mt-1 w-48 bg-white rounded-lg shadow-soft border border-outline/10 py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                  <Link href="/perfil" className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-on-surface-variant hover:text-primary hover:bg-primary/5">
+                    <UserCog size={14} /> Mi perfil
+                  </Link>
                   {user.role === "admin" && (
                     <>
                       <Link href="/admin" className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-on-surface-variant hover:text-primary hover:bg-primary/5">
@@ -99,7 +130,7 @@ export function Navbar() {
                     <AlertTriangle size={14} /> Reportar problema
                   </Link>
                   <button
-                    onClick={() => signOut({ callbackUrl: "/" })}
+                    onClick={() => signOut()}
                     className="w-full flex items-center gap-2 text-left px-4 py-2 text-xs font-bold text-on-surface-variant hover:text-primary hover:bg-primary/5"
                   >
                     <LogOut size={14} /> Cerrar sesión
@@ -140,6 +171,13 @@ export function Navbar() {
 
           {status === "authenticated" && user ? (
             <>
+              <Link
+                href="/perfil"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-2 py-2 text-on-surface-variant hover:text-primary font-semibold text-sm transition-all"
+              >
+                <UserCog size={16} /> Mi perfil
+              </Link>
               {user.role === "admin" && (
                 <>
                   <Link
@@ -175,7 +213,7 @@ export function Navbar() {
               <button
                 onClick={() => {
                   setMenuOpen(false);
-                  signOut({ callbackUrl: "/" });
+                  signOut();
                 }}
                 className="flex items-center gap-2 py-2 text-on-surface-variant hover:text-primary font-semibold text-sm transition-all"
               >
