@@ -1,24 +1,44 @@
 "use client";
 
-import { useCallback, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useSyncExternalStore } from "react";
 import type { Property } from "@/data/mockProperties";
 import { createListenerSet } from "./browser-store";
 
-const PUBLISHED_KEY = "cw_published_properties";
+// Antes esto vivía en localStorage (solo en el navegador de quien publicaba).
+// Ahora las propiedades publicadas viven en la base de datos (tabla
+// Listing), ligadas al usuario que las publicó, así que "Mis propiedades"
+// funciona igual desde cualquier dispositivo. Este hook mantiene el MISMO
+// shape público ({ published, addProperty }) que ya usan Home.tsx,
+// ExplorePage.tsx y la página de detalle de la propiedad, para no tener que
+// tocar esos archivos.
 const store = createListenerSet();
-let cache: Property[] | null = null;
+let cache: Property[] = [];
+let hasLoaded = false;
+let inflight: Promise<void> | null = null;
 
-function readFromStorage(): Property[] {
+async function loadListings(): Promise<void> {
   try {
-    const raw = window.localStorage.getItem(PUBLISHED_KEY);
-    return raw ? (JSON.parse(raw) as Property[]) : [];
+    const res = await fetch("/api/listings", { cache: "no-store" });
+    if (res.ok) {
+      const data = await res.json();
+      cache = Array.isArray(data.listings) ? data.listings : [];
+    }
   } catch {
-    return [];
+    // Sin conexión — se sigue mostrando lo que ya había en cache (puede
+    // estar vacío si es la primera carga).
+  } finally {
+    hasLoaded = true;
+    inflight = null;
+    store.emit();
   }
 }
 
+function ensureLoaded() {
+  if (hasLoaded || inflight) return;
+  inflight = loadListings();
+}
+
 function getSnapshot(): Property[] {
-  if (!cache) cache = readFromStorage();
   return cache;
 }
 
@@ -28,17 +48,47 @@ function getServerSnapshot(): Property[] {
   return EMPTY_PUBLISHED;
 }
 
+// Además del shape público Property, la API necesita las partes sueltas de
+// la dirección (para poder editarlas después desde "Mis propiedades") — ver
+// app/api/listings/route.ts.
+export interface PublishListingInput extends Omit<Property, "id"> {
+  estado: string;
+  municipio: string;
+  localidad?: string;
+  calle: string;
+  numero?: string;
+  colonia?: string;
+}
+
 export function usePublishedProperties() {
   const published = useSyncExternalStore(store.subscribe, getSnapshot, getServerSnapshot);
 
-  const addProperty = useCallback((property: Omit<Property, "id">) => {
-    const newProperty: Property = { ...property, id: `user-${Date.now()}` };
-    const next = [newProperty, ...getSnapshot()];
-    cache = next;
-    window.localStorage.setItem(PUBLISHED_KEY, JSON.stringify(next));
-    store.emit();
-    return newProperty;
+  useEffect(() => {
+    ensureLoaded();
   }, []);
 
-  return { published, addProperty };
+  const addProperty = useCallback(async (property: PublishListingInput) => {
+    const res = await fetch("/api/listings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(property),
+    });
+    const responseData = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(responseData.error || "No se pudo publicar la propiedad — intenta de nuevo.");
+    }
+    const listing = responseData.listing as Property;
+    cache = [listing, ...cache];
+    store.emit();
+    return listing;
+  }, []);
+
+  // Por si algo más (p. ej. el dashboard "Mis propiedades" tras editar una
+  // propiedad) necesita forzar una relectura del catálogo público.
+  const refresh = useCallback(() => {
+    hasLoaded = false;
+    ensureLoaded();
+  }, []);
+
+  return { published, addProperty, refresh };
 }

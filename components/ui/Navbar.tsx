@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Search, Bell, Globe, ChevronDown, Check, Plus, Menu, X, Heart, User, LogOut, ShieldCheck, BarChart3, AlertTriangle, Wrench, UserCog } from "lucide-react";
+import { Search, Bell, Globe, ChevronDown, Check, Plus, Menu, X, Heart, User, LogOut, ShieldCheck, BarChart3, AlertTriangle, Wrench, UserCog, Building2 } from "lucide-react";
 import { CoworkLogo } from "@/components/CoworkLogo";
 import { useSupabaseUser } from "@/components/SessionProviderWrapper";
 import { createClient } from "@/lib/supabase/client";
@@ -113,6 +113,9 @@ export function Navbar() {
                   <Link href="/perfil" className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-on-surface-variant hover:text-primary hover:bg-primary/5">
                     <UserCog size={14} /> Mi perfil
                   </Link>
+                  <Link href="/perfil/propiedades" className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-on-surface-variant hover:text-primary hover:bg-primary/5">
+                    <Building2 size={14} /> Mis propiedades
+                  </Link>
                   {user.role === "admin" && (
                     <>
                       <Link href="/admin" className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-on-surface-variant hover:text-primary hover:bg-primary/5">
@@ -177,6 +180,13 @@ export function Navbar() {
                 className="flex items-center gap-2 py-2 text-on-surface-variant hover:text-primary font-semibold text-sm transition-all"
               >
                 <UserCog size={16} /> Mi perfil
+              </Link>
+              <Link
+                href="/perfil/propiedades"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-2 py-2 text-on-surface-variant hover:text-primary font-semibold text-sm transition-all"
+              >
+                <Building2 size={16} /> Mis propiedades
               </Link>
               {user.role === "admin" && (
                 <>

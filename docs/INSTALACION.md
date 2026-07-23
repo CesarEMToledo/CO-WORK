@@ -64,7 +64,7 @@ valores. Todos los detalles de dónde sacar cada uno están en
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Llave pública de Supabase |
 | `SUPABASE_SERVICE_ROLE_KEY` | Llave secreta de Supabase (solo backend) |
 | `DATABASE_URL` | Conexión a la base de datos Postgres del proyecto |
-| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Opcional — sin esto, el mapa de `/explorar` usa Leaflet automáticamente, sin necesidad de ninguna llave |
+| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Opcional — sin esto, el mapa de `/explorar` usa Leaflet automáticamente. No afecta a `/publicar`: la ubicación de propiedades nuevas usa Nominatim (OpenStreetMap, gratuito, sin llave) más el pin que se ajusta a mano |
 
 ⚠️ `.env.local` nunca se sube a git (ya está en `.gitignore`) y nunca debe
 compartirse por Slack, WhatsApp, issues de GitHub, etc. — pide esos valores

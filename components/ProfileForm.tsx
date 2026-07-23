@@ -3,6 +3,7 @@
 import { useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { User as UserIcon, Camera } from "lucide-react";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 import { createClient } from "@/lib/supabase/client";
 import { compressImage } from "@/lib/image-compress";
 
@@ -245,8 +246,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
         <div>
           <label className="block text-sm font-bold text-on-surface mb-1.5">Nueva contraseña</label>
-          <input
-            type="password"
+          <PasswordInput
             required
             minLength={8}
             value={newPassword}
@@ -256,8 +256,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
         </div>
         <div>
           <label className="block text-sm font-bold text-on-surface mb-1.5">Confirmar nueva contraseña</label>
-          <input
-            type="password"
+          <PasswordInput
             required
             minLength={8}
             value={confirmPassword}

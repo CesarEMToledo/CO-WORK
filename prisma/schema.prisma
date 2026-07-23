@@ -82,6 +82,19 @@ enum VisitRequestStatus {
   cancelled
 }
 
+enum ListingOperation {
+  VENTA
+  RENTA
+}
+
+/** Defaults to "disponible". Mirrors data/mockProperties.ts's PropertyStatus union. */
+enum ListingStatus {
+  disponible
+  vendida
+  rentada
+  no_disponible
+}
+
 model Site {
   id         String     @id @default(cuid())
   name       String
@@ -113,6 +126,7 @@ model User {
   reservations Reservation[]
   assignments  PropertyAssignment[]
   issueReports IssueReport[]
+  listings     Listing[]
 
   @@index([role, siteId])
 }
@@ -207,4 +221,81 @@ model VisitRequest {
 
   @@index([propertyId])
   @@index([status])
+}
+
+// El catálogo de "publicar propiedad" (venta/renta de casas, terrenos, etc. —
+// distinto del catálogo de espacios de coworking de arriba). Antes vivía solo
+// en localStorage del navegador; ahora se guarda aquí, ligado al usuario que
+// la publicó, para que "Mis propiedades" funcione desde cualquier dispositivo.
+model Listing {
+  id        String           @id @default(cuid())
+  ownerId   String
+  owner     User             @relation(fields: [ownerId], references: [id])
+  title     String
+  // Dirección: se guarda el texto ya armado para mostrar (location) y también
+  // las partes sueltas para poder rellenar el formulario al editar.
+  location  String
+  // Nombre del estado tal cual aparece en data/mexico-geo.ts (ESTADOS) — con
+  // default para que las propiedades publicadas antes de agregar este campo
+  // (todas en San Luis Potosí) no se queden con un valor vacío.
+  estado    String  @default("San Luis Potosí")
+  municipio String
+  localidad String?
+  calle     String
+  numero    String?
+  colonia   String?
+  // Coordenadas exactas del pin puesto a mano en el mapa (ver
+  // components/LocationPicker.tsx) — nunca coordenadas re-geocodificadas del
+  // texto de la dirección.
+  lat         Decimal?         @db.Decimal(10, 7)
+  lng         Decimal?         @db.Decimal(10, 7)
+  price       String
+  priceSuffix String?
+  operation   ListingOperation
+  category    String
+  description String
+  // Array de { icon, label }, ver PropertySpec en data/mockProperties.ts.
+  specs     Json           @default("[]")
+  imageUrl  String
+  images    String[]       @default([])
+  videoUrl  String?
+  status    ListingStatus  @default(disponible)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  rentalTransactions RentalTransaction[]
+
+  @@index([ownerId])
+  @@index([status])
+}
+
+// Un registro por cada renta ya cobrada de una propiedad en RENTA — para
+// poder ver cuántas veces se ha rentado y las ganancias netas por mes. El
+// desglose (comisión de Stripe, comisión de la plataforma, estimado de
+// impuestos) se calcula y se GUARDA al momento de registrar la renta, para
+// que si los porcentajes configurados cambian después, el historial ya
+// registrado no se reescriba solo. Ver lib/earnings.ts para el cálculo y las
+// notas sobre por qué son estimaciones, no cifras fiscales exactas.
+model RentalTransaction {
+  id        String   @id @default(cuid())
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  startDate DateTime
+  endDate   DateTime
+  guestName String?
+  notes     String?
+
+  currency String @default("MXN")
+
+  grossAmount        Decimal @db.Decimal(10, 2)
+  stripeFeeAmount     Decimal @db.Decimal(10, 2)
+  platformFeeAmount   Decimal @db.Decimal(10, 2)
+  estimatedTaxAmount  Decimal @db.Decimal(10, 2)
+  netAmount           Decimal @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now())
+
+  @@index([listingId])
+  @@index([startDate])
 }

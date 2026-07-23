@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 import { createClient } from "@/lib/supabase/client";
 
 interface Site {
@@ -109,8 +110,7 @@ export function RegisterForm({ sites }: { sites: Site[] }) {
 
       <div>
         <label className="block text-sm font-bold text-on-surface mb-1.5">Contraseña</label>
-        <input
-          type="password"
+        <PasswordInput
           required
           minLength={8}
           value={password}
