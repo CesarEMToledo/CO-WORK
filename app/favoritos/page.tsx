@@ -33,13 +33,14 @@ export default function FavoritosPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {favoriteProperties.map((property) => (
-              <PropertyCard
-                key={property.id}
-                property={property}
-                isFavorite={isFavorite(property.id)}
-                onToggleFavorite={toggleFavorite}
-              />
+            {favoriteProperties.map((property, idx) => (
+              <div key={property.id} className="animate-fade-in h-full" style={{ animationDelay: `${Math.min(idx, 7) * 60}ms` }}>
+                <PropertyCard
+                  property={property}
+                  isFavorite={isFavorite(property.id)}
+                  onToggleFavorite={toggleFavorite}
+                />
+              </div>
             ))}
           </div>
         )}

@@ -158,7 +158,7 @@ export function ListingRentals({ listingId, onRentalLogged }: ListingRentalsProp
               className="w-full px-2.5 py-1.5 rounded-lg border border-outline/20 text-xs focus:ring-2 focus:ring-primary outline-none"
             />
           </div>
-          {formError && <p className="text-xs font-medium text-red-600">{formError}</p>}
+          {formError && <p className="text-xs font-medium text-error">{formError}</p>}
           <button
             type="submit"
             disabled={saving}
@@ -175,7 +175,7 @@ export function ListingRentals({ listingId, onRentalLogged }: ListingRentalsProp
           <Loader2 size={16} className="animate-spin" /> Cargando rentas...
         </div>
       ) : error ? (
-        <p className="text-sm font-medium text-red-600 py-2">{error}</p>
+        <p className="text-sm font-medium text-error py-2">{error}</p>
       ) : rentals.length === 0 ? (
         <p className="text-sm text-on-surface-variant py-4 text-center">Todavía no has registrado ninguna renta.</p>
       ) : (

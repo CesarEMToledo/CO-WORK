@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { Info, Loader2, Plus } from "lucide-react";
+import { Info, Loader2, Plus, Sparkles } from "lucide-react";
 import { ListingCard } from "@/components/listings/ListingCard";
 import type { MonthlyEarningsRow, OwnedListing } from "@/components/listings/types";
 
@@ -15,6 +15,8 @@ export function MisPropiedades() {
   const [error, setError] = useState("");
   const [listings, setListings] = useState<OwnedListing[]>([]);
   const [monthlyEarnings, setMonthlyEarnings] = useState<MonthlyEarningsRow[]>([]);
+  const [activeFeaturedCount, setActiveFeaturedCount] = useState(0);
+  const [maxFeaturedSlots, setMaxFeaturedSlots] = useState(6);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -24,6 +26,8 @@ export function MisPropiedades() {
         if (data.listings) {
           setListings(data.listings);
           setMonthlyEarnings(data.monthlyEarnings ?? []);
+          setActiveFeaturedCount(data.activeFeaturedCount ?? 0);
+          setMaxFeaturedSlots(data.maxFeaturedSlots ?? 6);
         } else {
           setError(data.error || "No se pudieron cargar tus propiedades.");
         }
@@ -45,7 +49,7 @@ export function MisPropiedades() {
   }
 
   if (error) {
-    return <p className="text-sm font-medium text-red-600 py-8 text-center">{error}</p>;
+    return <p className="text-sm font-medium text-error py-8 text-center">{error}</p>;
   }
 
   if (listings.length === 0) {
@@ -108,6 +112,21 @@ export function MisPropiedades() {
         </section>
       )}
 
+      <section className="bg-white rounded-lg shadow-card p-5 flex items-start gap-3">
+        <span className="shrink-0 w-9 h-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+          <Sparkles size={17} />
+        </span>
+        <div>
+          <h2 className="font-extrabold text-on-surface text-sm">
+            Colecciones Destacadas — {activeFeaturedCount}/{maxFeaturedSlots} cupos ocupados esta semana
+          </h2>
+          <p className="text-xs text-on-surface-variant mt-0.5">
+            Destaca una propiedad para que aparezca en el carrusel de inicio por 7 días — $50 MXN/semana. Cupo
+            limitado a {maxFeaturedSlots} propiedades a la vez; libera un cupo la propiedad que ya lleva sus 7 días.
+          </p>
+        </div>
+      </section>
+
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="font-extrabold text-on-surface">Tus propiedades publicadas ({listings.length})</h2>
@@ -121,6 +140,8 @@ export function MisPropiedades() {
             listing={listing}
             onUpdated={(updated) => setListings((prev) => prev.map((l) => (l.id === updated.id ? { ...l, ...updated } : l)))}
             onRentalLogged={load}
+            onFeatured={load}
+            featuredSlotsFull={activeFeaturedCount >= maxFeaturedSlots}
           />
         ))}
       </section>

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/permissions";
+import { createNotification } from "@/lib/notifications";
 
 const VISIT_STATUSES = ["pending", "contacted", "confirmed", "cancelled"] as const;
 
@@ -60,6 +61,34 @@ export async function POST(request: NextRequest) {
       agentPhone: data.agentPhone,
     },
   });
+
+  // Si esta propiedad es una publicada por un usuario (no del catálogo
+  // estático de coworking), le avisamos al dueño — nunca debe tronar la
+  // solicitud pública si esto falla, por eso va en su propio try/catch.
+  try {
+    const listing = await prisma.listing.findUnique({
+      where: { id: data.propertyId },
+      select: { ownerId: true },
+    });
+    if (listing) {
+      const dateLabel = new Date(data.visitDate).toLocaleDateString("es-MX", {
+        day: "numeric",
+        month: "long",
+      });
+      const isReserva = data.type === "reserva";
+      await createNotification({
+        userId: listing.ownerId,
+        type: "interesado",
+        title: isReserva ? "Nueva solicitud de reserva" : "Nueva visita agendada",
+        message: `${data.requesterName} ${
+          isReserva ? "quiere reservar" : "agendó una visita a"
+        } "${data.propertyTitle}" el ${dateLabel} a las ${data.visitTime}.`,
+        link: "/perfil/propiedades",
+      });
+    }
+  } catch (err) {
+    console.error("No se pudo crear la notificación de interesado:", err);
+  }
 
   return NextResponse.json({ id: visitRequest.id }, { status: 201 });
 }

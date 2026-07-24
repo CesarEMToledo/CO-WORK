@@ -26,9 +26,9 @@ const ROLE_LABEL: Record<Role, string> = {
 };
 
 const STATUS_STYLE: Record<UserStatus, { label: string; dot: string; text: string }> = {
-  active: { label: "Activo", dot: "bg-emerald-500", text: "text-emerald-700" },
-  inactive: { label: "Inactivo", dot: "bg-gray-400", text: "text-gray-600" },
-  away: { label: "Ausente", dot: "bg-amber-500", text: "text-amber-700" },
+  active: { label: "Activo", dot: "bg-success", text: "text-success" },
+  inactive: { label: "Inactivo", dot: "bg-outline", text: "text-on-surface-variant" },
+  away: { label: "Ausente", dot: "bg-warning", text: "text-warning" },
 };
 
 function formatDate(value: Date | null) {
@@ -176,7 +176,7 @@ export default async function AdminPage({
             <Link
               href={`/admin?role=${role}&page=${Math.max(1, page - 1)}`}
               aria-disabled={page === 1}
-              className={`p-2 rounded-lg border border-outline/20 hover:bg-sahara-container ${page === 1 ? "pointer-events-none opacity-40" : ""}`}
+              className={`p-2 rounded-lg border border-outline/20 hover:bg-sahara-container ${page === 1 ? "pointer-events-none opacity-60 cursor-not-allowed" : ""}`}
               aria-label="Página anterior"
             >
               <ChevronLeft size={16} />
@@ -185,7 +185,7 @@ export default async function AdminPage({
             <Link
               href={`/admin?role=${role}&page=${Math.min(totalPages, page + 1)}`}
               aria-disabled={page >= totalPages}
-              className={`p-2 rounded-lg border border-outline/20 hover:bg-sahara-container ${page >= totalPages ? "pointer-events-none opacity-40" : ""}`}
+              className={`p-2 rounded-lg border border-outline/20 hover:bg-sahara-container ${page >= totalPages ? "pointer-events-none opacity-60 cursor-not-allowed" : ""}`}
               aria-label="Página siguiente"
             >
               <ChevronRight size={16} />

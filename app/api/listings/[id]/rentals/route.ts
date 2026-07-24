@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/permissions";
 import { calculateRentalEarnings } from "@/lib/earnings";
+import { createNotification } from "@/lib/notifications";
 
 const createSchema = z
   .object({
@@ -94,6 +95,25 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       netAmount: breakdown.netAmount,
     },
   });
+
+  // Sirve como comprobante/registro en la campanita — nunca debe tronar el
+  // registro de la renta si esto falla.
+  try {
+    const startLabel = rental.startDate.toLocaleDateString("es-MX", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+    await createNotification({
+      userId: session.user.id,
+      type: "renta_registrada",
+      title: "Renta registrada",
+      message: `Registraste una renta de "${listing.title}" — inicia el ${startLabel}.`,
+      link: "/perfil/propiedades",
+    });
+  } catch (err) {
+    console.error("No se pudo crear la notificación de renta registrada:", err);
+  }
 
   return NextResponse.json({ rental }, { status: 201 });
 }

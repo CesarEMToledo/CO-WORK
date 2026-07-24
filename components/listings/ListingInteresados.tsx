@@ -12,10 +12,10 @@ const STATUS_LABELS: Record<VisitRequestRow["status"], string> = {
 };
 
 const STATUS_STYLES: Record<VisitRequestRow["status"], string> = {
-  pending: "bg-amber-100 text-amber-800",
-  contacted: "bg-blue-100 text-blue-800",
-  confirmed: "bg-green-100 text-green-800",
-  cancelled: "bg-red-100 text-red-800",
+  pending: "bg-warning-container text-on-warning-container",
+  contacted: "bg-primary-container text-on-primary-container",
+  confirmed: "bg-success-container text-on-success-container",
+  cancelled: "bg-error-container text-on-error-container",
 };
 
 function formatDate(iso: string): string {
@@ -76,7 +76,7 @@ export function ListingInteresados({ listingId }: { listingId: string }) {
                 {i.type === "visita" ? "Visita" : "Reserva"} · {formatDate(i.visitDate)} · {i.visitTime}
               </p>
             </div>
-            <span className={`shrink-0 text-[10px] font-extrabold px-2 py-1 rounded-full ${STATUS_STYLES[i.status]}`}>
+            <span className={`shrink-0 text-[10px] font-extrabold px-2 py-1 rounded-lg ${STATUS_STYLES[i.status]}`}>
               {STATUS_LABELS[i.status]}
             </span>
           </div>

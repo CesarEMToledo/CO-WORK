@@ -10,6 +10,7 @@ import { Footer } from "@/components/ui/Footer";
 import { featuredCollections, marketUpdates, type PropertyCategory } from "@/data/mockProperties";
 import { useFavorites } from "@/lib/use-favorites";
 import { usePublishedProperties } from "@/lib/use-published-properties";
+import { useFeaturedListings } from "@/lib/use-featured-listings";
 import { isPropertyAvailable } from "@/lib/property-filters";
 
 type Operation = "all" | "VENTA" | "RENTA";
@@ -47,13 +48,21 @@ export function Home() {
 
   const { isFavorite, toggleFavorite } = useFavorites();
   const { published } = usePublishedProperties();
+  const { featured } = useFeaturedListings();
 
   // Sold / withdrawn listings never show up on the homepage, same rule as /explorar.
   const allMarketProperties = useMemo(
     () => [...published, ...marketUpdates].filter(isPropertyAvailable),
     [published]
   );
-  const availableFeatured = useMemo(() => featuredCollections.filter(isPropertyAvailable), []);
+  // "Colecciones Destacadas" ahora es un cupo pagado (ver app/api/featured/
+  // route.ts) — máximo 6 propiedades reales a la vez. Mientras todavía no
+  // haya ninguna (p. ej. antes de que alguien pague por primera vez), se
+  // rellena con el catálogo curado estático para no dejar la sección vacía.
+  const availableFeatured = useMemo(() => {
+    const realFeatured = featured.filter(isPropertyAvailable);
+    return realFeatured.length > 0 ? realFeatured : featuredCollections.filter(isPropertyAvailable);
+  }, [featured]);
 
   const filtered = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -86,7 +95,7 @@ export function Home() {
     <>
       <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
         <section className="py-12 md:py-16">
-          <div className="max-w-3xl mx-auto text-center space-y-8">
+          <div className="max-w-3xl mx-auto text-center space-y-8 animate-fade-in">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-on-surface leading-tight">
               Encuentra tu <span className="relative inline-block">
                 <span className="relative z-10 text-primary">santuario</span>
@@ -113,7 +122,7 @@ export function Home() {
         </section>
 
         <section className="mb-16">
-          <div className="flex items-end justify-between mb-8">
+          <div className="flex items-end justify-between mb-8 animate-fade-in">
             <div>
               <h2 className="text-3xl font-extrabold text-on-surface">Colecciones Destacadas</h2>
               <p className="text-on-surface-variant mt-1 text-sm">Propiedades curadas para una estancia inolvidable en San Luis Potosí.</p>
@@ -126,7 +135,7 @@ export function Home() {
         </section>
 
         <section>
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8 animate-fade-in">
             <div>
               <h2 className="text-3xl font-extrabold text-on-surface">Novedades en el Mercado</h2>
               <p className="text-on-surface-variant mt-1 text-sm">Oportunidades frescas en los mejores parajes turísticos.</p>
@@ -171,13 +180,14 @@ export function Home() {
           ) : (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {paginated.map((property) => (
-                  <PropertyCard
-                    key={property.id}
-                    property={property}
-                    isFavorite={isFavorite(property.id)}
-                    onToggleFavorite={toggleFavorite}
-                  />
+                {paginated.map((property, idx) => (
+                  <div key={property.id} className="animate-fade-in h-full" style={{ animationDelay: `${Math.min(idx, 7) * 60}ms` }}>
+                    <PropertyCard
+                      property={property}
+                      isFavorite={isFavorite(property.id)}
+                      onToggleFavorite={toggleFavorite}
+                    />
+                  </div>
                 ))}
               </div>
 
@@ -187,7 +197,7 @@ export function Home() {
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                     disabled={currentPage === 1}
                     aria-label="Página anterior"
-                    className="w-9 h-9 flex items-center justify-center rounded-lg border border-outline/20 text-on-surface disabled:opacity-40 disabled:cursor-not-allowed hover:border-primary hover:text-primary transition-colors"
+                    className="w-9 h-9 flex items-center justify-center rounded-lg border border-outline/20 text-on-surface disabled:opacity-60 disabled:cursor-not-allowed hover:border-primary hover:text-primary transition-colors"
                   >
                     <ChevronLeft size={18} />
                   </button>
@@ -213,7 +223,7 @@ export function Home() {
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                     disabled={currentPage === totalPages}
                     aria-label="Página siguiente"
-                    className="w-9 h-9 flex items-center justify-center rounded-lg border border-outline/20 text-on-surface disabled:opacity-40 disabled:cursor-not-allowed hover:border-primary hover:text-primary transition-colors"
+                    className="w-9 h-9 flex items-center justify-center rounded-lg border border-outline/20 text-on-surface disabled:opacity-60 disabled:cursor-not-allowed hover:border-primary hover:text-primary transition-colors"
                   >
                     <ChevronRight size={18} />
                   </button>

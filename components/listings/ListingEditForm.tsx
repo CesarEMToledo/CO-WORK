@@ -19,6 +19,27 @@ const RENTAL_PERIODS: { value: string; label: string }[] = [
   { value: "/mes", label: "Por mes" },
 ];
 
+// Misma lógica que PublicarForm.formatAddressForGeocoding — filtra campos
+// vacíos para no mandarle al buscador de direcciones comas de más
+// (p. ej. "Calle 123, , , Municipio, Estado, México" cuando colonia o
+// localidad están vacías), lo que antes hacía que el pin cayera mal o
+// que la búsqueda fallara.
+function formatAddressForGeocoding(fields: {
+  calle: string;
+  numero: string;
+  colonia: string;
+  localidad: string;
+  municipio: string;
+  estado: string;
+}): string {
+  const { calle, numero, colonia, localidad, municipio, estado } = fields;
+  const streetLine = [calle.trim(), numero.trim() ? `#${numero.trim()}` : null].filter(Boolean).join(" ");
+  const parts = [streetLine, colonia.trim(), localidad.trim(), municipio.trim(), estado.trim()].filter(
+    (part) => part && part.trim()
+  );
+  return `${parts.join(", ")}, México`;
+}
+
 /** Edita los datos de una propiedad ya publicada — el mismo formulario que /publicar, pero mandando PATCH. */
 export function ListingEditForm({ listing, onSaved, onCancel }: ListingEditFormProps) {
   const [title, setTitle] = useState(listing.title);
@@ -166,7 +187,7 @@ export function ListingEditForm({ listing, onSaved, onCancel }: ListingEditFormP
       <div>
         <label className="block text-xs font-semibold text-on-surface-variant mb-1">Ajustar el pin en el mapa</label>
         <LocationPicker
-          address={`${calle}, ${colonia}, ${localidad}, ${municipio}, ${estado}, México`}
+          address={formatAddressForGeocoding({ calle, numero, colonia, localidad, municipio, estado })}
           canSearch={Boolean(municipio.trim() && calle.trim())}
           value={coordinates}
           onChange={setCoordinates}
@@ -234,7 +255,7 @@ export function ListingEditForm({ listing, onSaved, onCancel }: ListingEditFormP
         />
       </div>
 
-      {error && <p className="text-sm font-medium text-red-600">{error}</p>}
+      {error && <p className="text-sm font-medium text-error">{error}</p>}
 
       <div className="flex items-center gap-2">
         <button

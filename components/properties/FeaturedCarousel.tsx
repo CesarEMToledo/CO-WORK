@@ -3,10 +3,11 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, MapPin } from "lucide-react";
+import { Heart, MapPin, Lock } from "lucide-react";
 import { Property } from "@/data/mockProperties";
 import { SpecIcon } from "@/lib/spec-icon";
 import { CategoryBadge } from "@/components/properties/CategoryBadge";
+import { useSupabaseUser } from "@/components/SessionProviderWrapper";
 
 interface FeaturedCarouselProps {
   properties: Property[];
@@ -15,6 +16,8 @@ interface FeaturedCarouselProps {
 }
 
 export function FeaturedCarousel({ properties, isFavorite, onToggleFavorite }: FeaturedCarouselProps) {
+  const { status } = useSupabaseUser();
+  const authenticated = status === "authenticated";
   const [currentSlide, setCurrentSlide] = useState(0);
   const itemsPerSlide = 2; // Fixed for lg breakpoint logic simplified
   const totalSlides = Math.ceil(properties.length / itemsPerSlide);
@@ -47,7 +50,7 @@ export function FeaturedCarousel({ properties, isFavorite, onToggleFavorite }: F
                 <Link
                   href={`/propiedad/${property.id}`}
                   key={property.id}
-                  className="group relative rounded-lg overflow-hidden shadow-soft bg-white cursor-pointer h-full block"
+                  className="group relative rounded-lg overflow-hidden shadow-soft hover:-translate-y-1 transition-transform duration-300 bg-white cursor-pointer h-full block"
                 >
                   <div className="aspect-[4/3] w-full overflow-hidden relative">
                     <Image
@@ -68,30 +71,39 @@ export function FeaturedCarousel({ properties, isFavorite, onToggleFavorite }: F
                       }}
                       aria-label={favorite ? "Quitar de favoritos" : "Agregar a favoritos"}
                       aria-pressed={favorite}
-                      className="absolute top-4 right-4 w-10 h-10 rounded-lg bg-white/90 backdrop-blur-sm flex items-center justify-center text-on-surface hover:bg-primary hover:text-white transition-all"
+                      className="absolute top-4 right-4 w-10 h-10 rounded-lg bg-white/90 backdrop-blur-sm flex items-center justify-center text-on-surface hover:bg-primary hover:text-white transition-colors"
                     >
                       <Heart size={20} fill={favorite ? "currentColor" : "none"} className={favorite ? "text-primary" : ""} />
                     </button>
                   </div>
                   <div className="p-6 relative bg-white">
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <h3 className="text-xl font-extrabold text-on-surface group-hover:text-primary transition-colors">{property.title}</h3>
-                        <p className="text-on-surface-variant text-sm flex items-center gap-1 mt-1">
-                          <MapPin size={14} /> {property.location}
-                        </p>
+                    {authenticated ? (
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <h3 className="text-xl font-extrabold text-on-surface group-hover:text-primary transition-colors">{property.title}</h3>
+                          <p className="text-on-surface-variant text-sm flex items-center gap-1 mt-1">
+                            <MapPin size={14} /> {property.location}
+                          </p>
+                        </div>
+                        <span className="text-xl font-extrabold text-primary text-right shrink-0">
+                          {property.price}
+                          {property.priceSuffix && (
+                            <span className="block text-xs font-bold text-primary/70">{property.priceSuffix}</span>
+                          )}
+                        </span>
                       </div>
-                      <span className="text-xl font-extrabold text-primary text-right shrink-0">
-                        {property.price}
-                        {property.priceSuffix && (
-                          <span className="block text-xs font-bold text-primary/70">{property.priceSuffix}</span>
-                        )}
-                      </span>
-                    </div>
+                    ) : (
+                      <div className="mb-2">
+                        <h3 className="text-xl font-extrabold text-on-surface group-hover:text-primary transition-colors">{property.title}</h3>
+                        <span className="inline-flex items-center gap-1.5 text-sm font-bold text-primary mt-1">
+                          <Lock size={13} /> Inicia sesión para ver precio y ubicación
+                        </span>
+                      </div>
+                    )}
                     <div className="flex items-center gap-6 mt-6 pt-6 border-t border-outline/10">
                       {property.specs.map((spec, idx) => (
                         <div key={idx} className="flex items-center gap-2 text-on-surface-variant text-sm font-medium">
-                          <SpecIcon name={spec.icon} className="w-4 h-4" /> {spec.label}
+                          <SpecIcon name={spec.icon} className="w-4 h-4 text-primary" /> {spec.label}
                         </div>
                       ))}
                     </div>

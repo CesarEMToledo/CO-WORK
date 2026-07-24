@@ -14,9 +14,9 @@ export function CategoryFilters({ active, onChange, onOpenFilters }: CategoryFil
     <div className="flex items-center justify-start md:justify-center gap-3 overflow-x-auto hide-scroll py-2">
       <button
         onClick={() => onChange("all")}
-        className={`whitespace-nowrap px-5 py-2 rounded-lg text-sm font-bold transition-all ${
+        className={`whitespace-nowrap px-5 py-2 rounded-lg text-sm font-bold transition-all hover:-translate-y-0.5 ${
           active === "all"
-            ? "bg-on-surface text-white shadow-lg hover:-translate-y-0.5"
+            ? "bg-on-surface text-white shadow-soft"
             : "bg-white border border-outline/10 text-on-surface-variant hover:text-primary hover:border-primary/50 hover:bg-primary/5"
         }`}
       >
@@ -26,9 +26,9 @@ export function CategoryFilters({ active, onChange, onOpenFilters }: CategoryFil
         <button
           key={category.id}
           onClick={() => onChange(category.id)}
-          className={`whitespace-nowrap px-5 py-2 rounded-lg text-sm font-bold transition-all ${
+          className={`whitespace-nowrap px-5 py-2 rounded-lg text-sm font-bold transition-all hover:-translate-y-0.5 ${
             active === category.id
-              ? "bg-on-surface text-white shadow-lg hover:-translate-y-0.5"
+              ? "bg-on-surface text-white shadow-soft"
               : "bg-white border border-outline/10 text-on-surface-variant hover:text-primary hover:border-primary/50 hover:bg-primary/5"
           }`}
         >

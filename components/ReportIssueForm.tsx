@@ -216,7 +216,7 @@ export function ReportIssueForm({ reservations }: { reservations: ReservationOpt
           )}
         </div>
 
-        {error && <p className="text-sm font-medium text-red-600">{error}</p>}
+        {error && <p className="text-sm font-medium text-error">{error}</p>}
 
         <button
           type="submit"

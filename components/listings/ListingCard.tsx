@@ -7,6 +7,7 @@ import { ChevronDown, ChevronUp, ExternalLink, Loader2, PencilLine, Users, Walle
 import { ListingEditForm } from "./ListingEditForm";
 import { ListingInteresados } from "./ListingInteresados";
 import { ListingRentals } from "./ListingRentals";
+import { FeatureListingButton } from "./FeatureListingButton";
 import type { OwnedListing } from "./types";
 
 const STATUS_OPTIONS: { value: NonNullable<OwnedListing["status"]>; label: string }[] = [
@@ -26,9 +27,13 @@ interface ListingCardProps {
   listing: OwnedListing;
   onUpdated: (updated: OwnedListing) => void;
   onRentalLogged: () => void;
+  /** Recarga todo "Mis propiedades" — se usa tras destacar, para que el cupo ocupado (activeFeaturedCount) quede al día. */
+  onFeatured: () => void;
+  /** true cuando ya hay 6 cupos activos en "Colecciones Destacadas" en todo el sitio. */
+  featuredSlotsFull: boolean;
 }
 
-export function ListingCard({ listing, onUpdated, onRentalLogged }: ListingCardProps) {
+export function ListingCard({ listing, onUpdated, onRentalLogged, onFeatured, featuredSlotsFull }: ListingCardProps) {
   const [panel, setPanel] = useState<Panel>(null);
   const [statusSaving, setStatusSaving] = useState(false);
   const [statusError, setStatusError] = useState("");
@@ -66,7 +71,7 @@ export function ListingCard({ listing, onUpdated, onRentalLogged }: ListingCardP
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <span
-                  className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full text-white ${
+                  className={`text-[10px] font-extrabold px-2 py-0.5 rounded-lg text-white ${
                     listing.type === "VENTA" ? "bg-on-surface" : "bg-primary"
                   }`}
                 >
@@ -103,7 +108,7 @@ export function ListingCard({ listing, onUpdated, onRentalLogged }: ListingCardP
             </div>
           </div>
 
-          {statusError && <p className="text-xs font-medium text-red-600 mt-1">{statusError}</p>}
+          {statusError && <p className="text-xs font-medium text-error mt-1">{statusError}</p>}
 
           <div className="flex items-center gap-2 mt-3 flex-wrap">
             <button
@@ -138,6 +143,12 @@ export function ListingCard({ listing, onUpdated, onRentalLogged }: ListingCardP
                 {panel === "rentals" ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
               </button>
             )}
+            <FeatureListingButton
+              listingId={listing.id}
+              featuredUntil={listing.featuredUntil}
+              slotsFull={featuredSlotsFull}
+              onFeatured={onFeatured}
+            />
           </div>
         </div>
       </div>

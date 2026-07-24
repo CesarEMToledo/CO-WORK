@@ -8,6 +8,8 @@ import { Property } from "@/data/mockProperties";
 import { SpecIcon } from "@/lib/spec-icon";
 import { CategoryBadge } from "@/components/properties/CategoryBadge";
 import { getGalleryForProperty } from "@/lib/property-details";
+import { useSupabaseUser } from "@/components/SessionProviderWrapper";
+import { Lock } from "lucide-react";
 
 const CARD_ROTATE_MS = 4000;
 
@@ -32,6 +34,8 @@ export function PropertyCard({
 }: PropertyCardProps) {
   const gallery = getGalleryForProperty(property);
   const [activeImage, setActiveImage] = useState(0);
+  const { status } = useSupabaseUser();
+  const authenticated = status === "authenticated";
 
   useEffect(() => {
     if (gallery.length <= 1) return;
@@ -46,7 +50,7 @@ export function PropertyCard({
       href={`/propiedad/${property.id}`}
       onMouseEnter={() => onHoverChange?.(true)}
       onMouseLeave={() => onHoverChange?.(false)}
-      className={`bg-white rounded-lg overflow-hidden shadow-card hover:shadow-soft transition-all duration-300 group cursor-pointer h-full flex flex-col ${
+      className={`bg-white rounded-lg overflow-hidden shadow-card hover:shadow-soft hover:-translate-y-1 transition-all duration-300 group cursor-pointer h-full flex flex-col ${
         highlighted ? "ring-2 ring-primary shadow-soft" : ""
       } ${className}`}
     >
@@ -87,11 +91,22 @@ export function PropertyCard({
         )}
       </div>
       <div className="p-4 flex flex-col flex-grow">
-        <h3 className="font-extrabold text-xl text-on-surface mb-1">
-          {property.price} {property.priceSuffix ? <span className="text-sm font-bold text-on-surface-variant">{property.priceSuffix}</span> : null}
-        </h3>
-        <h4 className="text-on-surface-variant font-bold truncate mb-1">{property.title}</h4>
-        <p className="text-on-surface-variant/70 text-xs mb-4">{property.location}</p>
+        {authenticated ? (
+          <>
+            <h3 className="font-extrabold text-xl text-on-surface mb-1">
+              {property.price} {property.priceSuffix ? <span className="text-sm font-bold text-on-surface-variant">{property.priceSuffix}</span> : null}
+            </h3>
+            <h4 className="text-on-surface-variant font-bold truncate mb-1">{property.title}</h4>
+            <p className="text-on-surface-variant/70 text-xs mb-4">{property.location}</p>
+          </>
+        ) : (
+          <>
+            <h4 className="text-on-surface-variant font-bold truncate mb-1">{property.title}</h4>
+            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-primary mb-4 w-fit">
+              <Lock size={12} /> Inicia sesión para ver precio y ubicación
+            </span>
+          </>
+        )}
         <div className="mt-auto flex items-center justify-between pt-3 border-t border-outline/10">
           {property.specs.map((spec, idx) => (
             <div key={idx} className="flex items-center gap-1 text-on-surface-variant text-xs font-bold">

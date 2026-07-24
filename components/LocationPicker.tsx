@@ -157,13 +157,13 @@ export function LocationPicker({ address, canSearch, value, onChange, onResolved
       </div>
 
       {notFound && (
-        <p className="text-sm font-medium text-amber-700">
+        <p className="text-sm font-medium text-warning">
           No encontramos esa dirección en el mapa (pasa seguido en zonas rurales — el buscador gratuito de
           direcciones no siempre tiene todas las calles) — arrastra el pin o haz clic en el punto correcto para
           ubicarlo tú mismo.
         </p>
       )}
-      {error && <p className="text-sm font-medium text-red-600">{error}</p>}
+      {error && <p className="text-sm font-medium text-error">{error}</p>}
       <p className="text-xs text-on-surface-variant">
         <strong>Arrastra el pin o haz clic en el mapa para dejarlo exactamente en el lugar</strong> — la dirección
         escrita solo ayuda a acercar el mapa al área correcta, pero lo que se guarda de verdad es dónde quede el

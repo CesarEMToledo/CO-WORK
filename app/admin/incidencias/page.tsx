@@ -14,9 +14,9 @@ const STATUS_FILTERS: { id: IssueStatus | "all"; label: string }[] = [
 ];
 
 const STATUS_STYLE: Record<IssueStatus, { label: string; dot: string; text: string }> = {
-  open: { label: "Abierto", dot: "bg-red-500", text: "text-red-700" },
-  in_progress: { label: "En progreso", dot: "bg-amber-500", text: "text-amber-700" },
-  resolved: { label: "Resuelto", dot: "bg-emerald-500", text: "text-emerald-700" },
+  open: { label: "Abierto", dot: "bg-error", text: "text-error" },
+  in_progress: { label: "En progreso", dot: "bg-warning", text: "text-warning" },
+  resolved: { label: "Resuelto", dot: "bg-success", text: "text-success" },
 };
 
 const CATEGORY_META: Record<IssueCategory, { label: string; icon: typeof Wrench }> = {

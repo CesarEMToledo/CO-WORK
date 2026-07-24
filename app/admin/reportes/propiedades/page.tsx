@@ -24,9 +24,9 @@ const STATUS_LABEL: Record<PropertyStatus, string> = {
 };
 
 const STATUS_STYLE: Record<PropertyStatus, { dot: string; text: string }> = {
-  available: { dot: "bg-emerald-500", text: "text-emerald-700" },
-  maintenance: { dot: "bg-amber-500", text: "text-amber-700" },
-  inactive: { dot: "bg-gray-400", text: "text-gray-600" },
+  available: { dot: "bg-success", text: "text-success" },
+  maintenance: { dot: "bg-warning", text: "text-warning" },
+  inactive: { dot: "bg-outline", text: "text-on-surface-variant" },
 };
 
 function formatCurrency(value: number) {
@@ -85,11 +85,11 @@ export default async function PropiedadesReportPage({
           </div>
           <div className="p-6 bg-white rounded-lg shadow-card">
             <div className="text-sm font-medium text-on-surface-variant mb-1">Disponibles</div>
-            <div className="text-2xl font-extrabold text-emerald-700">{statusCountMap.get("available") ?? 0}</div>
+            <div className="text-2xl font-extrabold text-success">{statusCountMap.get("available") ?? 0}</div>
           </div>
           <div className="p-6 bg-white rounded-lg shadow-card">
             <div className="text-sm font-medium text-on-surface-variant mb-1">En mantenimiento</div>
-            <div className="text-2xl font-extrabold text-amber-700">{statusCountMap.get("maintenance") ?? 0}</div>
+            <div className="text-2xl font-extrabold text-warning">{statusCountMap.get("maintenance") ?? 0}</div>
           </div>
           <div className="p-6 bg-white rounded-lg shadow-card">
             <div className="text-sm font-medium text-on-surface-variant mb-1">Ingresos generados</div>

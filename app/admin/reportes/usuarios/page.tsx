@@ -22,9 +22,9 @@ const ROLE_LABEL: Record<Role, string> = {
 };
 
 const STATUS_STYLE: Record<UserStatus, { label: string; dot: string; text: string }> = {
-  active: { label: "Activo", dot: "bg-emerald-500", text: "text-emerald-700" },
-  inactive: { label: "Inactivo", dot: "bg-gray-400", text: "text-gray-600" },
-  away: { label: "Ausente", dot: "bg-amber-500", text: "text-amber-700" },
+  active: { label: "Activo", dot: "bg-success", text: "text-success" },
+  inactive: { label: "Inactivo", dot: "bg-outline", text: "text-on-surface-variant" },
+  away: { label: "Ausente", dot: "bg-warning", text: "text-warning" },
 };
 
 function formatDate(value: Date | null) {

@@ -34,7 +34,8 @@ export function AssignPropertyForm({ agentId, options }: { agentId: string; opti
       <select
         value={propertyId}
         onChange={(e) => setPropertyId(e.target.value)}
-        className="flex-1 px-3 py-2 rounded-lg border border-outline/20 bg-white text-sm"
+        aria-label="Seleccionar propiedad para asignar"
+        className="flex-1 px-3 py-2 rounded-lg border border-outline/20 bg-white text-sm focus:ring-2 focus:ring-primary outline-none"
       >
         {options.map((o) => (
           <option key={o.id} value={o.id}>{o.name}</option>

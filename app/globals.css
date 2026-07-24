@@ -18,6 +18,28 @@
   --color-sahara-dim: #e4d8ce;
   --color-sahara-container: #f8ece2;
 
+  /* Semántico (error/éxito/aviso) — antes cada formulario inventaba su
+     propio rojo/verde/ámbar de Tailwind (text-red-600, text-emerald-600,
+     text-amber-700...) sin relación con la paleta terracota de la marca.
+     Estos siguen el mismo patrón "color / on-color / color-container /
+     on-color-container" que ya usa --color-primary arriba, así que dan
+     las mismas utilidades automáticas: bg-error, text-error,
+     bg-error-container, text-on-error-container, etc. */
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #410002;
+
+  --color-success: #3f6b32;
+  --color-on-success: #ffffff;
+  --color-success-container: #dcedd0;
+  --color-on-success-container: #0e2004;
+
+  --color-warning: #8a5a00;
+  --color-on-warning: #ffffff;
+  --color-warning-container: #ffe8b8;
+  --color-on-warning-container: #2a1800;
+
   --font-sans: var(--font-manrope), sans-serif;
   --font-display: var(--font-manrope), sans-serif;
 
@@ -29,6 +51,33 @@
   html,
   body {
     overflow-x: hidden;
+  }
+
+  /* Animación de entrada compartida — antes cada sección/carrusel definía su
+     propia duración y easing suelto (duration-300, -500, -700, cubic-bezier
+     a mano...) sin relación entre ellas. Esta es la única curva de entrada
+     del sitio: se usa en el hero, encabezados de sección y tarjetas de
+     propiedades para que la página se sienta como un solo diseño, no un
+     collage de animaciones distintas. */
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fade-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-fade-in {
+      animation: none;
+    }
   }
 
   .hide-scroll::-webkit-scrollbar {

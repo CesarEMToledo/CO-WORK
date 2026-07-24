@@ -3,8 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Search, Bell, Globe, ChevronDown, Check, Plus, Menu, X, Heart, User, LogOut, ShieldCheck, BarChart3, AlertTriangle, Wrench, UserCog, Building2 } from "lucide-react";
+import { Search, Globe, ChevronDown, Check, Plus, Menu, X, Heart, User, LogOut, ShieldCheck, BarChart3, AlertTriangle, Wrench, UserCog, Building2, Sparkles } from "lucide-react";
 import { CoworkLogo } from "@/components/CoworkLogo";
+import { NotificationsBell } from "@/components/ui/NotificationsBell";
 import { useSupabaseUser } from "@/components/SessionProviderWrapper";
 import { createClient } from "@/lib/supabase/client";
 
@@ -94,13 +95,10 @@ export function Navbar() {
                 <button className="w-full text-left block px-4 py-2 text-xs font-bold text-on-surface-variant hover:text-primary hover:bg-primary/5">EN</button>
               </div>
             </div>
-            <button aria-label="Buscar" className="hidden sm:inline-flex text-on-surface-variant hover:text-primary transition-colors">
+            <Link href="/explorar" aria-label="Buscar" className="hidden sm:inline-flex text-on-surface-variant hover:text-primary transition-colors">
               <Search size={20} />
-            </button>
-            <button aria-label="Notificaciones" className="hidden md:inline-flex text-on-surface-variant hover:text-primary transition-colors relative">
-              <Bell size={20} />
-              <span className="absolute top-0 right-0 w-2 h-2 bg-primary rounded-full border-2 border-background"></span>
-            </button>
+            </Link>
+            <NotificationsBell />
 
             {status === "authenticated" && user ? (
               <div className="relative group hidden md:block">
@@ -126,6 +124,9 @@ export function Navbar() {
                       </Link>
                       <Link href="/admin/incidencias" className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-on-surface-variant hover:text-primary hover:bg-primary/5">
                         <Wrench size={14} /> Incidencias
+                      </Link>
+                      <Link href="/admin/destacados" className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-on-surface-variant hover:text-primary hover:bg-primary/5">
+                        <Sparkles size={14} /> Destacados
                       </Link>
                     </>
                   )}
@@ -210,6 +211,13 @@ export function Navbar() {
                     className="flex items-center gap-2 py-2 text-on-surface-variant hover:text-primary font-semibold text-sm transition-all"
                   >
                     <Wrench size={16} /> Incidencias
+                  </Link>
+                  <Link
+                    href="/admin/destacados"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-2 py-2 text-on-surface-variant hover:text-primary font-semibold text-sm transition-all"
+                  >
+                    <Sparkles size={16} /> Destacados
                   </Link>
                 </>
               )}

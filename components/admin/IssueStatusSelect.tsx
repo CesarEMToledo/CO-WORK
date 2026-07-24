@@ -31,7 +31,8 @@ export function IssueStatusSelect({ issueId, status }: { issueId: string; status
       value={status}
       disabled={loading}
       onChange={(e) => handleChange(e.target.value as Status)}
-      className="text-xs font-bold border border-outline/20 rounded-lg px-2 py-1.5 bg-white disabled:opacity-60"
+      aria-label="Cambiar estado de la incidencia"
+      className="text-xs font-bold border border-outline/20 rounded-lg px-2 py-1.5 bg-white disabled:opacity-60 focus:ring-2 focus:ring-primary outline-none"
     >
       {(Object.keys(STATUS_LABEL) as Status[]).map((s) => (
         <option key={s} value={s}>{STATUS_LABEL[s]}</option>

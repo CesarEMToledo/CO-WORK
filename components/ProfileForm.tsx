@@ -229,8 +229,8 @@ export function ProfileForm({ user }: ProfileFormProps) {
           />
         </div>
 
-        {profileError && <p className="text-sm font-medium text-red-600">{profileError}</p>}
-        {profileSuccess && <p className="text-sm font-medium text-emerald-600">Perfil actualizado.</p>}
+        {profileError && <p className="text-sm font-medium text-error">{profileError}</p>}
+        {profileSuccess && <p className="text-sm font-medium text-success">Perfil actualizado.</p>}
 
         <button
           type="submit"
@@ -265,9 +265,9 @@ export function ProfileForm({ user }: ProfileFormProps) {
           />
         </div>
 
-        {passwordError && <p className="text-sm font-medium text-red-600">{passwordError}</p>}
+        {passwordError && <p className="text-sm font-medium text-error">{passwordError}</p>}
         {passwordSuccess && (
-          <p className="text-sm font-medium text-emerald-600">Contraseña actualizada.</p>
+          <p className="text-sm font-medium text-success">Contraseña actualizada.</p>
         )}
 
         <button

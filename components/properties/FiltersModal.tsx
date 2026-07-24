@@ -46,7 +46,7 @@ function Stepper({ label, value, onChange, max = 10 }: StepperProps) {
           onClick={() => onChange(Math.max(0, value - 1))}
           disabled={value <= 0}
           aria-label={`Reducir ${label.toLowerCase()}`}
-          className="w-8 h-8 flex items-center justify-center rounded-full border border-outline/20 text-on-surface disabled:opacity-30 disabled:cursor-not-allowed hover:border-primary hover:text-primary transition-colors"
+          className="w-8 h-8 flex items-center justify-center rounded-full border border-outline/20 text-on-surface disabled:opacity-60 disabled:cursor-not-allowed hover:border-primary hover:text-primary transition-colors"
         >
           <Minus size={14} />
         </button>
@@ -56,7 +56,7 @@ function Stepper({ label, value, onChange, max = 10 }: StepperProps) {
           onClick={() => onChange(Math.min(max, value + 1))}
           disabled={value >= max}
           aria-label={`Aumentar ${label.toLowerCase()}`}
-          className="w-8 h-8 flex items-center justify-center rounded-full border border-outline/20 text-on-surface disabled:opacity-30 disabled:cursor-not-allowed hover:border-primary hover:text-primary transition-colors"
+          className="w-8 h-8 flex items-center justify-center rounded-full border border-outline/20 text-on-surface disabled:opacity-60 disabled:cursor-not-allowed hover:border-primary hover:text-primary transition-colors"
         >
           <Plus size={14} />
         </button>

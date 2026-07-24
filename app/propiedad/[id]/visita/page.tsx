@@ -425,7 +425,7 @@ export default function ScheduleVisitPage() {
                   />
                 </div>
 
-                {error && <p className="text-sm font-medium text-red-600 mb-4">{error}</p>}
+                {error && <p className="text-sm font-medium text-error mb-4">{error}</p>}
 
                 <div className="flex items-center justify-end gap-4 pt-4 border-t border-outline/10">
                   <button
@@ -439,7 +439,7 @@ export default function ScheduleVisitPage() {
                     type="button"
                     onClick={handleConfirm}
                     disabled={!canSubmit}
-                    className="flex items-center gap-2 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-lg py-3 px-6 transition-colors"
+                    className="flex items-center gap-2 bg-primary hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold rounded-lg py-3 px-6 transition-colors"
                   >
                     {loading ? "Enviando..." : confirmLabel} <CalendarIcon size={16} />
                   </button>

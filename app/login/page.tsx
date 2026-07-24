@@ -106,7 +106,7 @@ function LoginForm() {
         </div>
 
         {(error || oauthError) && (
-          <p className="text-sm font-medium text-red-600">
+          <p className="text-sm font-medium text-error">
             {error || "No se pudo completar el inicio de sesión. Intenta de nuevo."}
           </p>
         )}

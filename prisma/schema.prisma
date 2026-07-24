@@ -123,10 +123,12 @@ model User {
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
-  reservations Reservation[]
-  assignments  PropertyAssignment[]
-  issueReports IssueReport[]
-  listings     Listing[]
+  reservations       Reservation[]
+  assignments        PropertyAssignment[]
+  issueReports       IssueReport[]
+  listings           Listing[]
+  notifications      Notification[]
+  featuredSlotsAdded FeaturedSlot[]
 
   @@index([role, siteId])
 }
@@ -264,6 +266,7 @@ model Listing {
   updatedAt DateTime       @updatedAt
 
   rentalTransactions RentalTransaction[]
+  featuredSlots      FeaturedSlot[]
 
   @@index([ownerId])
   @@index([status])
@@ -298,4 +301,76 @@ model RentalTransaction {
 
   @@index([listingId])
   @@index([startDate])
+}
+
+// Cupo pagado (o regalado por un admin) en el carrusel de "Colecciones
+// Destacadas" del inicio — máximo 6 cupos activos a la vez (ver
+// lib/featured.ts), 7 días por cupo, $50 MXN/semana. El desglose de
+// ingresos se calcula y GUARDA al crear el registro (mismo cálculo que
+// RentalTransaction, ver lib/earnings.ts), para que cambios futuros a la
+// configuración no reescriban el historial ya cobrado.
+//
+// isComplimentary = true cuando lo agregó un administrador gratis para una
+// propiedad que no es suya — en ese caso el desglose de ingresos queda en
+// cero (no hubo cobro real).
+//
+// Nota de alcance: por ahora esto NO cobra de verdad por Stripe — se crea
+// como si el pago ya se hubiera hecho, para tener la funcionalidad y el
+// reporte de ingresos listos antes de conectar el checkout real.
+model FeaturedSlot {
+  id        String   @id @default(cuid())
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  startDate DateTime @default(now())
+  endDate   DateTime
+
+  isComplimentary Boolean @default(false)
+
+  grossAmount        Decimal @db.Decimal(10, 2)
+  stripeFeeAmount    Decimal @db.Decimal(10, 2)
+  platformFeeAmount  Decimal @db.Decimal(10, 2)
+  estimatedTaxAmount Decimal @db.Decimal(10, 2)
+  netAmount          Decimal @db.Decimal(10, 2)
+
+  addedByUserId String
+  addedBy       User   @relation(fields: [addedByUserId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([listingId])
+  @@index([endDate])
+}
+
+enum NotificationType {
+  // Alguien agendó una visita o pidió reservar una de tus propiedades
+  // publicadas (viene de VisitRequest).
+  interesado
+  // Registraste una renta ya cobrada de una de tus propiedades.
+  renta_registrada
+  // Publicaste una propiedad nueva.
+  propiedad_publicada
+}
+
+// Notificaciones de la campanita del navbar — hoy solo para dueños de
+// propiedades publicadas (Listing), pero el modelo es genérico por si más
+// adelante se usa para otra cosa. Se crean desde el servidor cada vez que
+// pasa algo relevante (ver lib/notifications.ts); el cliente las consulta
+// con polling desde lib/use-notifications.ts.
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  message   String
+  // A dónde llevar al usuario si le da clic — por ahora siempre
+  // /perfil/propiedades, pero se deja como campo por si distintos tipos de
+  // notificación necesitan mandar a otro lado en el futuro.
+  link      String?
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  @@index([userId, read])
+  @@index([userId, createdAt])
 }

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/permissions";
 import { listingToProperty } from "@/lib/listing-mapper";
+import { createNotification } from "@/lib/notifications";
 
 const specSchema = z.object({ icon: z.string().min(1), label: z.string().min(1) });
 
@@ -93,6 +94,20 @@ export async function POST(request: NextRequest) {
       },
       include: { owner: { select: { name: true, phone: true } } },
     });
+
+    // Extra: confirmación en la campanita de que la publicación quedó
+    // lista — nunca debe tronar la publicación si esto falla.
+    try {
+      await createNotification({
+        userId: session.user.id,
+        type: "propiedad_publicada",
+        title: "Propiedad publicada",
+        message: `Tu propiedad "${listing.title}" ya está visible en el catálogo.`,
+        link: "/perfil/propiedades",
+      });
+    } catch (notifErr) {
+      console.error("No se pudo crear la notificación de propiedad publicada:", notifErr);
+    }
 
     return NextResponse.json(
       { listing: listingToProperty(listing, listing.owner) },

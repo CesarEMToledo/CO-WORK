@@ -11,6 +11,7 @@ import {
   MapPin,
   Phone,
   Calendar,
+  LogIn,
   CheckCircle2,
   Info,
   ChevronDown,
@@ -24,6 +25,8 @@ import {
 } from "lucide-react";
 import { Navbar } from "@/components/ui/Navbar";
 import { Footer } from "@/components/ui/Footer";
+import { LoginGate } from "@/components/ui/LoginGate";
+import { useSupabaseUser } from "@/components/SessionProviderWrapper";
 import { SpecIcon } from "@/lib/spec-icon";
 import { CategoryBadge } from "@/components/properties/CategoryBadge";
 import { allProperties } from "@/data/mockProperties";
@@ -59,6 +62,8 @@ function WhatsAppIcon({ size = 16 }: { size?: number }) {
 export default function PropertyDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
+  const { status } = useSupabaseUser();
+  const authenticated = status === "authenticated";
   const { published } = usePublishedProperties();
   const { isFavorite, toggleFavorite } = useFavorites();
   const [showFiscal, setShowFiscal] = useState(false);
@@ -195,9 +200,11 @@ export default function PropertyDetailPage() {
                 <Heart size={20} fill={favorite ? "currentColor" : "none"} className={favorite ? "text-primary" : ""} />
               </button>
             </div>
-            <p className="text-on-surface-variant flex items-center gap-1.5 mb-6">
-              <MapPin size={16} /> {property.location}
-            </p>
+            <LoginGate label="la ubicación" className="mb-6">
+              <p className="text-on-surface-variant flex items-center gap-1.5">
+                <MapPin size={16} /> {property.location}
+              </p>
+            </LoginGate>
 
             <div className="flex items-center gap-8 py-6 border-y border-outline/10 mb-6">
               {property.specs.map((spec, idx) => (
@@ -314,73 +321,88 @@ export default function PropertyDetailPage() {
 
           <aside className="lg:col-span-1 space-y-6">
             <div className="bg-white rounded-lg shadow-card p-6 lg:sticky lg:top-24">
-              <p className="text-3xl font-extrabold text-on-surface mb-1">
-                {property.price}{" "}
-                {property.priceSuffix && (
-                  <span className="text-base font-bold text-on-surface-variant">{property.priceSuffix}</span>
-                )}
-              </p>
-              <p className="text-sm text-on-surface-variant mb-5">{property.location}</p>
+              <LoginGate label="el precio y la ubicación" className="mb-5">
+                <p className="text-3xl font-extrabold text-on-surface mb-1">
+                  {property.price}{" "}
+                  {property.priceSuffix && (
+                    <span className="text-base font-bold text-on-surface-variant">{property.priceSuffix}</span>
+                  )}
+                </p>
+                <p className="text-sm text-on-surface-variant">{property.location}</p>
+              </LoginGate>
 
-              <div className="flex items-center justify-between gap-3 py-4 border-y border-outline/10 mb-5">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-11 h-11 shrink-0 rounded-full bg-primary/10 text-primary flex items-center justify-center font-extrabold text-sm">
-                    {agent.initials}
+              <LoginGate label="el contacto del agente" mode="replace" className="mb-5">
+                <div className="flex items-center justify-between gap-3 py-4 border-y border-outline/10">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-11 h-11 shrink-0 rounded-full bg-primary/10 text-primary flex items-center justify-center font-extrabold text-sm">
+                      {agent.initials}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-bold text-on-surface text-sm truncate">{agent.name}</p>
+                      <p className="text-xs font-semibold text-primary truncate">{agent.role}</p>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <p className="font-bold text-on-surface text-sm truncate">{agent.name}</p>
-                    <p className="text-xs font-semibold text-primary truncate">{agent.role}</p>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <a
+                      href={waContactUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`Escribir a ${agent.name} por WhatsApp`}
+                      className="w-9 h-9 flex items-center justify-center rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors"
+                    >
+                      <WhatsAppIcon size={16} />
+                    </a>
+                    <a
+                      href={telUrl}
+                      aria-label={`Llamar a ${agent.name}`}
+                      className="w-9 h-9 flex items-center justify-center rounded-lg border border-outline/20 text-on-surface hover:border-primary hover:text-primary transition-colors"
+                    >
+                      <Phone size={16} />
+                    </a>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <a
-                    href={waContactUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`Escribir a ${agent.name} por WhatsApp`}
-                    className="w-9 h-9 flex items-center justify-center rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors"
-                  >
-                    <WhatsAppIcon size={16} />
-                  </a>
-                  <a
-                    href={telUrl}
-                    aria-label={`Llamar a ${agent.name}`}
-                    className="w-9 h-9 flex items-center justify-center rounded-lg border border-outline/20 text-on-surface hover:border-primary hover:text-primary transition-colors"
-                  >
-                    <Phone size={16} />
-                  </a>
-                </div>
-              </div>
+              </LoginGate>
 
-              <Link
-                href={`/propiedad/${property.id}/visita`}
-                className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg py-3 transition-colors"
-              >
-                <Calendar size={18} /> {ctaLabel}
-              </Link>
+              {authenticated ? (
+                <Link
+                  href={`/propiedad/${property.id}/visita`}
+                  className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg py-3 transition-colors"
+                >
+                  <Calendar size={18} /> {ctaLabel}
+                </Link>
+              ) : (
+                <Link
+                  href={`/login?callbackUrl=${encodeURIComponent(`/propiedad/${property.id}/visita`)}`}
+                  className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg py-3 transition-colors"
+                >
+                  <LogIn size={18} /> Inicia sesión para {property.type === "VENTA" ? "agendar" : "reservar"}
+                </Link>
+              )}
             </div>
 
             <div className="bg-white rounded-lg shadow-card p-4">
               <h3 className="font-bold text-on-surface mb-3 flex items-center gap-1.5 text-sm">
                 <MapPin size={16} className="text-primary" /> Ubicación
               </h3>
-              <div className="rounded-lg overflow-hidden h-56 border border-outline/10">
-                <PropertyMap
-                  key={property.id}
-                  lat={coordinates.lat}
-                  lng={coordinates.lng}
-                  title={property.title}
-                  location={property.location}
-                />
-              </div>
-              <a
-                href={googleMapsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-3 flex items-center justify-center gap-2 text-sm font-bold text-primary hover:underline"
-              >
-                Ver en el mapa <MapPin size={14} />
-              </a>
+              <LoginGate label="la ubicación en el mapa" mode="replace" className="min-h-[14rem]">
+                <div className="rounded-lg overflow-hidden h-56 border border-outline/10">
+                  <PropertyMap
+                    key={property.id}
+                    lat={coordinates.lat}
+                    lng={coordinates.lng}
+                    title={property.title}
+                    location={property.location}
+                  />
+                </div>
+                <a
+                  href={googleMapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-3 flex items-center justify-center gap-2 text-sm font-bold text-primary hover:underline"
+                >
+                  Ver en el mapa <MapPin size={14} />
+                </a>
+              </LoginGate>
             </div>
           </aside>
         </div>

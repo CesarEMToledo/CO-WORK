@@ -11,6 +11,8 @@ export interface OwnedListing extends Property {
   interesadosCount: number;
   rentalCount: number;
   totalNetEarnings: number;
+  /** ISO date — si está en el futuro, la propiedad tiene un cupo activo en "Colecciones Destacadas". */
+  featuredUntil: string | null;
 }
 
 export interface VisitRequestRow {

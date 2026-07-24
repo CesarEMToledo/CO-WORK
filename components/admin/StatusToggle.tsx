@@ -27,7 +27,8 @@ export function StatusToggle({ userId, status, name }: { userId: string; status:
     <button
       onClick={handleToggle}
       disabled={loading}
-      className="text-xs font-bold text-primary hover:underline disabled:opacity-60"
+      aria-label={`${status === "active" ? "Suspender" : "Activar"} cuenta de ${name}`}
+      className="text-xs font-bold text-primary hover:underline disabled:opacity-60 focus:ring-2 focus:ring-primary outline-none rounded"
     >
       {status === "active" ? "Suspender" : "Activar"}
     </button>

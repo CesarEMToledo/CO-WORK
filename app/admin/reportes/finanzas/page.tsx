@@ -21,10 +21,10 @@ const STATUS_LABEL: Record<ReservationStatus, string> = {
 };
 
 const STATUS_STYLE: Record<ReservationStatus, string> = {
-  pending: "text-amber-700",
-  confirmed: "text-emerald-700",
-  completed: "text-emerald-700",
-  cancelled: "text-red-600",
+  pending: "text-warning",
+  confirmed: "text-success",
+  completed: "text-success",
+  cancelled: "text-error",
 };
 
 const RATE_TYPE_LABEL: Record<string, string> = {

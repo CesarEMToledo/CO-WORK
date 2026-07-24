@@ -138,7 +138,7 @@ export function ImageUploadField({ value, onChange }: ImageUploadFieldProps) {
         />
       </div>
 
-      {error && <p className="text-sm font-medium text-red-600">{error}</p>}
+      {error && <p className="text-sm font-medium text-error">{error}</p>}
 
       {value.length > 0 && (
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
@@ -147,7 +147,7 @@ export function ImageUploadField({ value, onChange }: ImageUploadFieldProps) {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={url} alt="" className="w-full h-full object-cover" />
               {index === 0 && (
-                <span className="absolute bottom-1 left-1 bg-black/60 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
+                <span className="absolute bottom-1 left-1 bg-black/60 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-lg">
                   Portada
                 </span>
               )}

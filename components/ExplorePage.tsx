@@ -186,15 +186,16 @@ export function ExplorePage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 xl:grid-cols-2 gap-4 p-4 sm:p-6">
-              {filtered.map((property) => (
-                <PropertyCard
-                  key={property.id}
-                  property={property}
-                  isFavorite={isFavorite(property.id)}
-                  onToggleFavorite={toggleFavorite}
-                  highlighted={hoveredId === property.id || selectedId === property.id}
-                  onHoverChange={(hovering) => setHoveredId(hovering ? property.id : null)}
-                />
+              {filtered.map((property, idx) => (
+                <div key={property.id} className="animate-fade-in h-full" style={{ animationDelay: `${Math.min(idx, 7) * 60}ms` }}>
+                  <PropertyCard
+                    property={property}
+                    isFavorite={isFavorite(property.id)}
+                    onToggleFavorite={toggleFavorite}
+                    highlighted={hoveredId === property.id || selectedId === property.id}
+                    onHoverChange={(hovering) => setHoveredId(hovering ? property.id : null)}
+                  />
+                </div>
               ))}
             </div>
           )}
